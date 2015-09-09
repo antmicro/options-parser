@@ -18,7 +18,6 @@ namespace Antmicro.OptionsParser
             options = new HashSet<ICommandLineOption>();
             parsedOptions = new List<ICommandLineOption>();
             unexpectedArguments = new List<IArgument>();
-            ExpectedValuesCount = 0;
             this.configuration = configuration ?? new ParserConfiguration();
         }
 
@@ -42,6 +41,11 @@ namespace Antmicro.OptionsParser
             options.Add(option);
             return option;
         }
+        
+        public void WithValue(string name)
+        {
+            values.Add(new PositionalArgument(name, null));
+        }
 
         /// <summary>
         /// Parses arguments provided in command line based on configuration described in type T.
@@ -53,7 +57,23 @@ namespace Antmicro.OptionsParser
         {
             foreach(var property in typeof(T).GetProperties())
             {
-                options.Add(new AutomaticCommandLineOption(property));
+                var positionalAttribute = property.GetCustomAttribute<PositionalArgumentAttribute>();
+                if(positionalAttribute != null)
+                {
+                    var argument = new PositionalArgument(property);
+                    if(values.Count > positionalAttribute.Position)
+                    {
+                        values.Insert(positionalAttribute.Position, argument);
+                    }
+                    else
+                    {
+                        values.Add(argument);
+                    }
+                }
+                else
+                {
+                    options.Add(new AutomaticCommandLineOption(property));
+                }
             }
 
             if(option is IValidatedOptions)
@@ -75,7 +95,7 @@ namespace Antmicro.OptionsParser
 
             foreach(var opt in parsedOptions.Union(options.OfType<AutomaticCommandLineOption>().Where(x => x.HasDefaultValue)))
             {
-                if (opt is AutomaticCommandLineOption)
+                if(opt is AutomaticCommandLineOption)
                 {
                     if(opt.OptionType == typeof(bool))
                     {
@@ -85,6 +105,15 @@ namespace Antmicro.OptionsParser
                     {
                         ((AutomaticCommandLineOption)opt).UnderlyingProperty.SetValue(option, opt.Value);
                     }
+                }
+            }
+            
+            foreach(var property in typeof(T).GetProperties())
+            {
+                var attribute = property.GetCustomAttribute<PositionalArgumentAttribute>();
+                if(attribute != null && attribute.Position < values.Count)
+                {
+                    property.SetValue(option, values[attribute.Position].Value);
                 }
             }
 
@@ -121,6 +150,7 @@ namespace Antmicro.OptionsParser
                     bldr.Append(arg).Append(' ');
                 }
             }
+            
             // trim last space
             if(bldr.Length > 0 && bldr[bldr.Length - 1] == ' ')
             {
@@ -129,7 +159,6 @@ namespace Antmicro.OptionsParser
             return bldr.ToString();
         }
 
-        public int ExpectedValuesCount { get; set; }
         public IEnumerable<ICommandLineOption> Options { get { return options; } }
         public IEnumerable<ICommandLineOption> ParsedOptions { get { return parsedOptions; } }
         public IEnumerable<IArgument> UnexpectedArguments { get { return unexpectedArguments; } }
@@ -145,14 +174,14 @@ namespace Antmicro.OptionsParser
                 var token = tokenizer.ReadNextToken();
                 if(token is PositionalArgumentToken)
                 {
-                    var arg = new PositionalArgument(((PositionalArgumentToken)token).Value);
-                    if(values.Count < ExpectedValuesCount)
+                    if(currentValuesCount < values.Count())
                     {
-                        arg.Descriptor = token.Descriptor;
-                        values.Add(arg);
+                        values[currentValuesCount].Descriptor = token.Descriptor;
+                        values[currentValuesCount++].Value = ((PositionalArgumentToken)token).Value;
                     }
                     else
                     {
+                        var arg = new PositionalArgument(((PositionalArgumentToken)token).Value);
                         unexpectedArguments.Add(arg);
                     }
                 }
@@ -213,6 +242,12 @@ namespace Antmicro.OptionsParser
             bool forceHelp = false;
             try
             {
+                var missingValue = values.FirstOrDefault(x => x.IsRequired && !x.IsSet);
+                if(missingValue != null)
+                {
+                    throw new ValidationException(string.Format("Required value '{0}' is missing.", missingValue.Name));
+                }
+                
                 var requiredOptions = options.Where(x => x.IsRequired);
                 foreach(var requiredOption in requiredOptions)
                 {
@@ -268,6 +303,7 @@ namespace Antmicro.OptionsParser
         private readonly List<PositionalArgument> values;
         private readonly HashSet<ICommandLineOption> options;
         private CustomValidationMethod customValidationMethod;
+        private int currentValuesCount;
     }
 
     internal delegate bool CustomValidationMethod(out string errorMessage);

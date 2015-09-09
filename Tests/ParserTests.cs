@@ -285,7 +285,8 @@ namespace Antmicro.OptionsParser.Tests
         {
             var args = new [] { "-a", "-b", "value-1", "-c", "value-2", "-d", "value-3" };
             var parser = new OptionsParser();
-            parser.ExpectedValuesCount = 2;
+            parser.WithValue("val1");
+            parser.WithValue("val2");
             parser.WithOption<bool>('a');
             parser.WithOption<bool>('b');
             parser.WithOption<bool>('c');
@@ -302,6 +303,43 @@ namespace Antmicro.OptionsParser.Tests
             Assert.AreEqual("value-1", parser.Values.ElementAt(0).Value);
             Assert.AreEqual("value-2", parser.Values.ElementAt(1).Value);
             Assert.AreEqual("value-3", parser.RecreateUnparsedArguments());
+        }
+        
+        [Test]
+        public void ShouldParsePositionalValues()
+        {
+            var args = new [] { "value", "value-2" };
+            var parser = new OptionsParser();
+            var options = new OptionsWithPositionalValues();
+            parser.Parse(options, args);
+            
+            Assert.AreEqual(1, parser.Values.Count());
+            Assert.AreEqual(1, parser.UnexpectedArguments.Count());
+            
+            Assert.AreEqual("value", options.Value);
+            Assert.AreEqual("value-2", parser.UnexpectedArguments.Cast<PositionalArgument>().First().Value);
+        }
+        
+        [Test]
+        public void ShoulNotParseOnMissingRequiredPositionalValues()
+        {
+            var args = new string [0];
+            var parser = new OptionsParser();
+            var options = new OptionsWithRequiredPositionalValues();
+            
+            Assert.AreEqual(false, parser.Parse(options, args));
+        }
+        
+        private class OptionsWithPositionalValues
+        {
+            [PositionalArgument(0), Name("value")]
+            public string Value { get; set; }
+        }
+        
+        private class OptionsWithRequiredPositionalValues
+        {
+            [Required, PositionalArgument(0), Name("value")]
+            public string Value { get; set; }
         }
     }
 }

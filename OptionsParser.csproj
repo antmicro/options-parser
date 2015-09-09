@@ -54,6 +54,7 @@
     <Compile Include="Parser\ParserConfiguration.cs" />
     <Compile Include="Validation\IValidatedOptions.cs" />
     <Compile Include="Parser\OptionsParser.cs" />
+    <Compile Include="Description\PositionalArgumentAttribute.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
