@@ -147,6 +147,12 @@ namespace Antmicro.OptionsParser
 
                 if(arg != "-" && arg.Length > 0)
                 {
+                    arg = arg.Replace(@"""", @"\""");
+                    if(arg.Contains(" "))
+                    {
+                        arg = string.Format("\"{0}\"", arg);
+                    }
+                    
                     bldr.Append(arg).Append(' ');
                 }
             }
