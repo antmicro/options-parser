@@ -1,0 +1,11 @@
+log.log
+
+*.userprefs
+
+bin/Debug
+bin/Release
+
+obj/Debug
+obj/Release
+
+packages/
