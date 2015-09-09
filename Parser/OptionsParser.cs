@@ -93,19 +93,9 @@ namespace Antmicro.OptionsParser
 
             InnerParse(args);
 
-            foreach(var opt in parsedOptions.Union(options.OfType<AutomaticCommandLineOption>().Where(x => x.HasDefaultValue)))
+            foreach(var opt in parsedOptions.OfType<AutomaticCommandLineOption>().Union(options.OfType<AutomaticCommandLineOption>().Where(x => x.HasDefaultValue)))
             {
-                if(opt is AutomaticCommandLineOption)
-                {
-                    if(opt.OptionType == typeof(bool))
-                    {
-                        ((AutomaticCommandLineOption)opt).UnderlyingProperty.SetValue(option, true);
-                    }
-                    else
-                    {
-                        ((AutomaticCommandLineOption)opt).UnderlyingProperty.SetValue(option, opt.Value);
-                    }
-                }
+                opt.UnderlyingProperty.SetValue(option, opt.Value);
             }
             
             foreach(var property in typeof(T).GetProperties())
