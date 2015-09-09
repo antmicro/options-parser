@@ -179,54 +179,62 @@ namespace Antmicro.OptionsParser.Tests
             Assert.AreEqual("test", parser.ParsedOptions.First().Value);
         }
 
-		[Test]
-		public void ShouldParseShortSwitchWithStringValue()
-		{
-			var args = new [] { "-nmValue" };
-			var parser = new OptionsParser();
-			parser.WithOption<bool>('n');
-			parser.WithOption<String>('m');
+        [Test]
+        public void ShouldParseShortSwitchWithStringValue()
+        {
+            var args = new [] { "-nmValue" };
+            var parser = new OptionsParser();
+            parser.WithOption<bool>('n');
+            parser.WithOption<String>('m');
 
-			parser.Parse(args);
+            parser.Parse(args);
 
-			Assert.AreEqual(2, parser.ParsedOptions.Count());
-			Assert.AreEqual('n', parser.ParsedOptions.First().ShortName);
-			Assert.AreEqual('m', parser.ParsedOptions.Skip(1).First().ShortName);
-			Assert.AreEqual("Value", parser.ParsedOptions.Skip(1).First().Value);
-		}
+            Assert.AreEqual(2, parser.ParsedOptions.Count());
+            Assert.AreEqual('n', parser.ParsedOptions.First().ShortName);
+            Assert.AreEqual('m', parser.ParsedOptions.Skip(1).First().ShortName);
+            Assert.AreEqual("Value", parser.ParsedOptions.Skip(1).First().Value);
+        }
 
-		[Test]
-		public void ShouldParseOptionWithSpacesInValue()
-		{
-			var args = new [] { "--option=Value with spaces" };
-			var parser = new OptionsParser ();
-			parser.WithOption<string> ("option");
+        [Test]
+        public void ShouldParseOptionWithSpacesInValue()
+        {
+            var args = new [] { "--option=Value with spaces" };
+            var parser = new OptionsParser();
+            parser.WithOption<string>("option");
 
-			parser.Parse(args);
+            parser.Parse(args);
 
-			Assert.AreEqual (1, parser.ParsedOptions.Count ());
-			Assert.AreEqual ("option", parser.ParsedOptions.First ().LongName);
-			Assert.AreEqual ("Value with spaces", parser.ParsedOptions.First ().Value);
-		}
+            Assert.AreEqual(1, parser.ParsedOptions.Count());
+            Assert.AreEqual("option", parser.ParsedOptions.First().LongName);
+            Assert.AreEqual("Value with spaces", parser.ParsedOptions.First().Value);
+        }
 
-		[Test]
-		public void ShouldParseShortOptionWithSeparatedValue()
-		{
-			var args = new [] { "-n", "123" };
-			var parser = new OptionsParser ();
-			parser.WithOption<int> ('n');
+        [Test]
+        public void ShouldParseShortOptionWithSeparatedValue()
+        {
+            var args = new [] { "-n", "123" };
+            var parser = new OptionsParser();
+            parser.WithOption<int>('n');
 
-			parser.Parse(args);
+            parser.Parse(args);
 
-			Assert.AreEqual (1, parser.ParsedOptions.Count ());
-			Assert.AreEqual ('n', parser.ParsedOptions.First ().ShortName);
-			Assert.AreEqual (123, parser.ParsedOptions.First ().Value);
-		}
+            Assert.AreEqual(1, parser.ParsedOptions.Count());
+            Assert.AreEqual('n', parser.ParsedOptions.First().ShortName);
+            Assert.AreEqual(123, parser.ParsedOptions.First().Value);
+        }
 
         [Test]
         public void ShouldRecreateUnparsedArguments()
         {
-            var args = new [] { "--expected", "-x", "value", "-y1", "--another-expected", "-Aw", "-z'this was unexpected'" };
+            var args = new [] {
+                "--expected",
+                "-x",
+                "value",
+                "-y1",
+                "--another-expected",
+                "-Aw",
+                "-z'this was unexpected'"
+            };
             var parser = new OptionsParser();
             parser.WithOption<bool>("expected");
             parser.WithOption<bool>("another-expected");
