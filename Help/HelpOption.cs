@@ -26,9 +26,23 @@ namespace Antmicro.OptionsParser
                 Console.WriteLine();
             }
 
+            var valuesBuilder = new StringBuilder();
+            foreach(var value in parser.Values)
+            {
+                if(value.IsRequired)
+                {
+                    valuesBuilder.Append(' ').Append(value.Name);
+                }
+                else
+                {
+                    valuesBuilder.AppendFormat(" [{0}]", value.Name);
+                }
+            }
+            
+            var usageLine = string.Format(UsageLineFormat, appInfo.ApplicationBinaryName, valuesBuilder);
             Console.WriteLine(CustomUsageLineGenerator != null
-                ? CustomUsageLineGenerator(appInfo.ApplicationBinaryName)
-                :  string.Format(UsageLineFormat, appInfo.ApplicationBinaryName));
+                ? CustomUsageLineGenerator(usageLine)
+                : usageLine);
 
             Console.WriteLine();
             Console.WriteLine("Options:");
@@ -52,7 +66,7 @@ namespace Antmicro.OptionsParser
 
         public Func<string> CustomFooterGenerator { get; set; }
 
-        public const string UsageLineFormat = "usage: {0} [options]";
+        public const string UsageLineFormat = "usage: {0} [options]{1}";
 
         private static string GenerateOptionHelpEntry(ICommandLineOption option)
         {
