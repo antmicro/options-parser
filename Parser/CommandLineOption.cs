@@ -52,7 +52,7 @@ namespace Antmicro.OptionsParser
 
         public string Description { get; protected set; }
 
-        public object Value { get; protected set; }
+        public object Value { get; set; }
 
         public virtual bool HasArgument { get; protected set; }
 

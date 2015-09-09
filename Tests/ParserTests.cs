@@ -19,6 +19,19 @@ namespace Antmicro.OptionsParser.Tests
             Assert.AreEqual(1, parser.ParsedOptions.Count());
             Assert.AreEqual('c', parser.ParsedOptions.First().ShortName);
         }
+        
+        [Test]
+        public void ShouldSetShortSwitchInClass()
+        {
+            var args = new [] { "-s" };
+            var options = new OptionsWithBool();
+            var parser = new OptionsParser();
+
+            parser.Parse(options, args);
+
+            Assert.AreEqual(1, parser.ParsedOptions.Count());
+            Assert.AreEqual(options.Switch, true);
+        }
 
         [Test]
         public void ShouldDetectLongSwitch()
@@ -328,6 +341,12 @@ namespace Antmicro.OptionsParser.Tests
             var options = new OptionsWithRequiredPositionalValues();
             
             Assert.AreEqual(false, parser.Parse(options, args));
+        }
+        
+        private class OptionsWithBool
+        {
+            [Name('s'), DefaultValue(false)]
+            public bool Switch { get; set; }
         }
         
         private class OptionsWithPositionalValues

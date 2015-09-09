@@ -11,7 +11,7 @@ namespace Antmicro.OptionsParser
         bool HasArgument { get; }
         bool IsRequired { get; }
         Type OptionType { get; }
-        object Value { get; }
+        object Value { get; set; }
     }
 }
 

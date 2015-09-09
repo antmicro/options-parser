@@ -193,6 +193,10 @@ namespace Antmicro.OptionsParser
                         }
 
                         foundOption.Descriptor = token.Descriptor.WithLengthChangedBy(2); // -- prefix
+                        if(foundOption.OptionType == typeof(bool))
+                        {
+                            foundOption.Value = true;
+                        }
                         parsedOptions.Add(foundOption);
                     }
                     else
@@ -223,6 +227,10 @@ namespace Antmicro.OptionsParser
                         }
 
                         foundOption.Descriptor = token.Descriptor.WithLengthChangedBy(additionalLength);
+                        if(foundOption.OptionType == typeof(bool))
+                        {
+                            foundOption.Value = true;
+                        }
                         parsedOptions.Add(foundOption);
                     }
                     else
