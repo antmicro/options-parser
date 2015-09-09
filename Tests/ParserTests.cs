@@ -245,7 +245,7 @@ namespace Antmicro.OptionsParser.Tests
             Assert.AreEqual(3, parser.ParsedOptions.Count());
             Assert.AreEqual("expected", parser.ParsedOptions.First().LongName);
             Assert.AreEqual("another-expected", parser.ParsedOptions.ElementAt(1).LongName);
-            Assert.AreEqual(@"-x value -y1 -w -z'this was unexpected'", parser.RecreateUnparsedArguments());
+            Assert.AreEqual(@"-x value -y1 -w ""-z'this was unexpected'""", parser.RecreateUnparsedArguments());
         }
 
         [Test]
