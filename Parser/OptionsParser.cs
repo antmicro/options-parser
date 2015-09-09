@@ -273,6 +273,12 @@ namespace Antmicro.OptionsParser
                         throw new ValidationException(errorMessage);
                     }
                 }
+                
+                if(!configuration.AllowUnexpectedArguments && unexpectedArguments.Any())
+                {
+                    throw new ValidationException(string.Format("Unexpected options detected: {0}", RecreateUnparsedArguments()));
+                }
+                
             } catch(ValidationException e)
             {
                 if(configuration.ThrowValidationException)

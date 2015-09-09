@@ -10,6 +10,7 @@ namespace Antmicro.OptionsParser
             ThrowValidationException = false;
         }
 
+        public bool AllowUnexpectedArguments { get; set; }
         public bool ThrowValidationException { get; set; }
         public bool GenerateHelp { get; set; }
         public Func<ICommandLineOption, string> CustomOptionEntryHelpGenerator { get; set; }
