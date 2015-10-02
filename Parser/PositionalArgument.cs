@@ -63,12 +63,7 @@ namespace Antmicro.OptionsParser
         {
             get
             {
-                if(underlyingProperty == null)
-                {
-                    return false;
-                }
-                
-                return underlyingProperty.GetCustomAttribute<RequiredAttribute>() != null;
+                return underlyingProperty != null && underlyingProperty.GetCustomAttribute<RequiredAttribute>() != null;
             }
         }
         
