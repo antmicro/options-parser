@@ -30,13 +30,32 @@ namespace Antmicro.OptionsParser
 
         public virtual bool ParseArgument(string arg)
         {
-            object val;
-            var result = ParseHelper.TryParse(arg, OptionType, out val);
-            if(result)
+            object parsedValue;
+            if(OptionType.IsArray)
             {
-                Value = val;
+                var values = arg.Split(new [] { Delimiter }, MaxElements);
+                var array = Array.CreateInstance(OptionType.GetElementType(), values.Length);
+                
+                for(int i = 0; i < values.Length; i++)
+                {
+                    if(!ParseHelper.TryParse(values[i], OptionType.GetElementType(), out parsedValue))
+                    {
+                        return false;
+                    }
+                    array.SetValue(parsedValue, i);
+                }
+                Value = array;
             }
-            return result;
+            else
+            {
+                if(!ParseHelper.TryParse(arg, OptionType, out parsedValue))
+                {
+                    return false;
+                }
+                Value = parsedValue;
+            }
+            
+            return true;
         }
 
         public bool Equals(CommandLineOption other)
@@ -59,6 +78,10 @@ namespace Antmicro.OptionsParser
         public bool IsRequired { get; protected set; }
 
         public ElementDescriptor Descriptor { get; set; }
+        
+        public char Delimiter { get; set; }
+        
+        public int MaxElements { get; set; }
 
         protected CommandLineOption()
         {

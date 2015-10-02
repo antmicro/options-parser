@@ -43,6 +43,20 @@ namespace Antmicro.OptionsParser
             {
                 Description = descriptionAttribute.Value;
             }
+            
+            if(OptionType.IsArray)
+            {
+                var numberOfElementsAttribute = pinfo.GetCustomAttribute<NumberOfElementsAttribute>();
+                if(numberOfElementsAttribute != null)
+                {
+                    MaxElements = numberOfElementsAttribute.Max;
+                }
+                var delimiterAttribute = pinfo.GetCustomAttribute<DelimiterAttribute>();
+                if(delimiterAttribute != null)
+                {
+                    Delimiter = delimiterAttribute.Delimiter;
+                }
+            }
         }
 
         public bool HasDefaultValue { get; private set; }

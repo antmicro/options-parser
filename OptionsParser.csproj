@@ -55,6 +55,8 @@
     <Compile Include="Validation\IValidatedOptions.cs" />
     <Compile Include="Parser\OptionsParser.cs" />
     <Compile Include="Description\PositionalArgumentAttribute.cs" />
+    <Compile Include="Description\NumberOfElementsAttribute.cs" />
+    <Compile Include="Description\DelimiterAttribute.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
