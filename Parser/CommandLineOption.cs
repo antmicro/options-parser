@@ -33,7 +33,7 @@ namespace Antmicro.OptionsParser
             object parsedValue;
             if(OptionType.IsArray)
             {
-                var values = arg.Split(new [] { Delimiter }, MaxElements);
+                var values = (MaxElements > 0) ? arg.Split(new[] { Delimiter }, MaxElements) : arg.Split(Delimiter); 
                 var array = Array.CreateInstance(OptionType.GetElementType(), values.Length);
                 
                 for(int i = 0; i < values.Length; i++)

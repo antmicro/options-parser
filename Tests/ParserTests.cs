@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using System;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace Antmicro.OptionsParser.Tests
 {
@@ -341,6 +342,29 @@ namespace Antmicro.OptionsParser.Tests
             var options = new OptionsWithRequiredPositionalValues();
             
             Assert.AreEqual(false, parser.Parse(options, args));
+        }
+        
+        [Test]
+        public void ShouldParseOptionWithMultipleValues()
+        {
+            var args = new [] { "-v", "1:2:3" };
+            var parser = new OptionsParser();
+            var options = new OptionsWithMultipleValues();
+            parser.Parse(options, args);
+            
+            Assert.AreEqual(3, options.Values.Length);
+            Assert.AreEqual(1, options.Values[0]);
+            Assert.AreEqual(2, options.Values[1]);
+            Assert.AreEqual(3, options.Values[2]);
+            
+            Assert.AreEqual(0, parser.Values.Count());
+            Assert.AreEqual(0, parser.UnexpectedArguments.Count());
+        }
+        
+        private class OptionsWithMultipleValues
+        {
+            [Name('v'), NumberOfElements(3), Delimiter(':')]
+            public int[] Values { get; set; }
         }
         
         private class OptionsWithBool
