@@ -361,6 +361,29 @@ namespace Antmicro.OptionsParser.Tests
             Assert.AreEqual(0, parser.UnexpectedArguments.Count());
         }
         
+        [Test]
+        public void ShouldParseEnum()
+        {
+            var args = new [] { "-v", "Y" };
+            var parser = new OptionsParser();
+            var options = new OptionsWithEnum();
+            parser.Parse(options, args);
+            
+            Assert.AreEqual(Enum.Y, options.Value);
+        }
+        
+        private class OptionsWithEnum
+        {
+            public Enum Value { get; set; }
+        }
+        
+        private enum Enum
+        {
+            X,
+            Y,
+            Z
+        }
+        
         private class OptionsWithMultipleValues
         {
             [Name('v'), NumberOfElements(3), Delimiter(':')]
