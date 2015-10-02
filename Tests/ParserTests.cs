@@ -372,6 +372,23 @@ namespace Antmicro.OptionsParser.Tests
             Assert.AreEqual(Enum.Y, options.Value);
         }
         
+        [Test]
+        public void ShouldParseEnumPositionalArgument()
+        {
+            var args = new [] { "Y" };
+            var parser = new OptionsParser();
+            var options = new OptionsWithPositionalEnumArgument();
+            parser.Parse(options, args);
+            
+            Assert.AreEqual(Enum.Y, options.Value);
+        }
+        
+        private class OptionsWithPositionalEnumArgument
+        {
+            [PositionalArgument(0)]
+            public Enum Value { get; set; }
+        }
+        
         private class OptionsWithEnum
         {
             public Enum Value { get; set; }

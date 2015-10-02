@@ -32,13 +32,28 @@ namespace Antmicro.OptionsParser
 
         public ElementDescriptor Descriptor { get; set; }
         
-        public string Value 
+        public object Value 
         { 
             get { return value; }
             set 
             {
+                var valueAsString = value as string;
+                if(underlyingProperty != null && valueAsString != null)
+                {
+                    object res;
+                    if(!ParseHelper.TryParse(valueAsString, underlyingProperty.PropertyType, out res))
+                    {
+                        return;
+                    }
+                    
+                    this.value = res;
+                }
+                else
+                {
+                    this.value = value;
+                }
+                
                 IsSet = true;
-                this.value = value;
             }
         }
         
@@ -60,7 +75,7 @@ namespace Antmicro.OptionsParser
         public string Name { get; private set; }
         
         private readonly PropertyInfo underlyingProperty;
-        private string value;
+        private object value;
     }
 }
 
