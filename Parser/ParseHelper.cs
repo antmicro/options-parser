@@ -25,6 +25,20 @@ namespace Antmicro.OptionsParser
                 value = str;
                 return true;
             }
+            
+            if(type.IsEnum)
+            {
+                try 
+                {
+                    value = Enum.Parse(type, str, true);
+                    return true;
+                }
+                catch(ArgumentException e) 
+                {
+                    value = null;
+                    return false;
+                }
+            }
 
             if(!SupportedTypes.Contains(type))
             {
