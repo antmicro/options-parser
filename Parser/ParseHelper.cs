@@ -33,7 +33,7 @@ namespace Antmicro.OptionsParser
                     value = Enum.Parse(type, str, true);
                     return true;
                 }
-                catch(ArgumentException e) 
+                catch(ArgumentException) 
                 {
                     value = null;
                     return false;
