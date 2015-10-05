@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System;
 
 namespace Antmicro.OptionsParser
 {
@@ -68,6 +69,8 @@ namespace Antmicro.OptionsParser
         }
         
         public string Name { get; private set; }
+        public string Description { get; private set; }
+        public Type ParameterType { get { return underlyingProperty == null ? typeof(object) : underlyingProperty.PropertyType; } }
         
         private readonly PropertyInfo underlyingProperty;
         private object value;
