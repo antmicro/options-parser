@@ -10,6 +10,7 @@ namespace Antmicro.OptionsParser
         string Description { get; }
         bool HasArgument { get; }
         bool IsRequired { get; }
+        char Delimiter { get; }
         Type OptionType { get; }
         object Value { get; set; }
     }
