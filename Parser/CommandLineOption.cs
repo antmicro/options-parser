@@ -26,6 +26,7 @@ namespace Antmicro.OptionsParser
             OptionType = type;
 
             HasArgument = (OptionType != typeof(bool));
+            Delimiter = ';';
         }
 
         public virtual bool ParseArgument(string arg)
