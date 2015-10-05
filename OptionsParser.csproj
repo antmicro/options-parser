@@ -57,11 +57,13 @@
     <Compile Include="Description\PositionalArgumentAttribute.cs" />
     <Compile Include="Description\NumberOfElementsAttribute.cs" />
     <Compile Include="Description\DelimiterAttribute.cs" />
+    <Compile Include="Enum\HideAttribute.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Folder Include="Validation\" />
     <Folder Include="Description\" />
     <Folder Include="Help\" />
+    <Folder Include="Enum\" />
   </ItemGroup>
 </Project>
