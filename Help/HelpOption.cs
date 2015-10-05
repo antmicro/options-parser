@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Text;
+using System.Reflection;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Antmicro.OptionsParser
 {
@@ -45,6 +48,19 @@ namespace Antmicro.OptionsParser
                 : usageLine);
 
             Console.WriteLine();
+             
+            var interestingPositionalArguments = parser.Values.Where(x => !string.IsNullOrEmpty(x.Description) || x.ParameterType.IsEnum).ToList();
+            if(interestingPositionalArguments.Count > 0)
+            {
+                Console.WriteLine("Arguments:");
+                Console.WriteLine();
+                
+                foreach(var value in interestingPositionalArguments)
+                {
+                    Console.WriteLine(GeneratePositionalArgumentHelpEntry(value));
+                }
+            }
+            
             Console.WriteLine("Options:");
             Console.WriteLine();
 
@@ -68,6 +84,28 @@ namespace Antmicro.OptionsParser
 
         public const string UsageLineFormat = "usage: {0} [options]{1}";
 
+        private static string GeneratePositionalArgumentHelpEntry(PositionalArgument argument)
+        {
+            var optionBuilder = new StringBuilder();
+            optionBuilder.AppendFormat(" '{0}' has possible values:\n\n", argument.Name);
+            
+            if(argument.ParameterType.IsEnum)
+            {
+                foreach(var e in GetEnumNames(argument.ParameterType))
+                {
+                    optionBuilder.AppendFormat("    {0,-26}", e.Item1);
+                    if(e.Item2 != null)
+                    {
+                        optionBuilder.Append(e.Item2);
+                    }
+                        
+                    optionBuilder.Append("\n\n");
+                }
+            }
+            
+            return optionBuilder.ToString();
+        }
+
         private static string GenerateOptionHelpEntry(ICommandLineOption option)
         {
             var optionBuilder = new StringBuilder("  ");
@@ -85,18 +123,49 @@ namespace Antmicro.OptionsParser
                 optionBuilder.AppendFormat("--{0}", option.LongName);
             }
             optionBuilder.Append(' ', Math.Max(0, 30 - optionBuilder.Length));
-            optionBuilder.Append(option.OptionType.Name.ToUpper());
-
+            if(option.OptionType.IsArray)
+            {
+                optionBuilder.AppendFormat("{0}s separated by '{1}'", option.OptionType.GetElementType().Name.ToUpper(), option.Delimiter);
+            }
+            else if(option.OptionType.IsEnum)
+            {
+                optionBuilder.AppendLine("ENUM with possible values: ");
+                foreach(var name in GetEnumNames(option.OptionType))
+                {
+                    optionBuilder.Append(' ', 32).Append(name.Item1).Append('\n');
+                }
+            }
+            else
+            {
+                optionBuilder.Append(option.OptionType.Name.ToUpper());
+            }
+            
             if(option.IsRequired)
             {
                 optionBuilder.Append(" (required)");
             }
 
-            optionBuilder.Append(' ', 3);
-
-            optionBuilder.Append(option.Description);
+            if(!string.IsNullOrWhiteSpace(option.Description))
+            {
+                optionBuilder.AppendLine();
+            
+                optionBuilder.Append(' ', 30);
+                optionBuilder.Append(option.Description);
+            }
 
             return optionBuilder.ToString();
+        }
+        
+        private static Tuple<string, string>[] GetEnumNames(Type enumType)
+        {
+            DescriptionAttribute attr;
+            
+            return Enum.GetValues(enumType)
+                .Cast<Enum>()
+                .Select(x => Enum.GetName(enumType, x))
+                .Where(x => enumType.GetMember(x)[0].GetCustomAttribute<HideAttribute>() == null)
+                .Select(x => Tuple.Create(x, (attr = enumType.GetMember(x)[0].GetCustomAttribute<DescriptionAttribute>()) != null ? attr.Value : null))
+                .ToArray();
         }
 
         private HelpOption(ApplicationInfo info) : base('h', "help")
