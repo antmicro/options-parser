@@ -243,7 +243,9 @@ namespace Antmicro.OptionsParser
 
         private bool Validate()
         {
-            bool forceHelp = false;
+            var helpOption = options.OfType<HelpOption>().SingleOrDefault();
+            var forceHelp = false;
+            var isHelpSelected = (helpOption != null && parsedOptions.Contains(helpOption));
             try
             {
                 var missingValue = values.FirstOrDefault(x => x.IsRequired && !x.IsSet);
@@ -283,20 +285,23 @@ namespace Antmicro.OptionsParser
                     throw new ValidationException(string.Format("Unexpected options detected: {0}", RecreateUnparsedArguments()));
                 }
                 
-            } catch(ValidationException e)
+            } 
+            catch(ValidationException e)
             {
                 if(configuration.ThrowValidationException)
                 {
                     throw;
                 }
 
-                Console.WriteLine(e.Message);
-                Console.WriteLine();
+                if(!isHelpSelected)
+                {
+                    Console.WriteLine(e.Message);
+                    Console.WriteLine();
+                }
                 forceHelp = true;
             }
 
-            var helpOption = options.OfType<HelpOption>().SingleOrDefault();
-            if(helpOption != null && (parsedOptions.Contains(helpOption) || forceHelp))
+            if(isHelpSelected || forceHelp)
             {
                 // help option is special case - we should present help and set flag
                 helpOption.PrintHelp(this);
