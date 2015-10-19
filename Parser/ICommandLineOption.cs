@@ -8,7 +8,6 @@ namespace Antmicro.OptionsParser
         char ShortName { get; }
         string LongName { get; }
         string Description { get; }
-        bool HasArgument { get; }
         bool IsRequired { get; }
         char Delimiter { get; }
         Type OptionType { get; }

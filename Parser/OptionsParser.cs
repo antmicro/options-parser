@@ -133,6 +133,12 @@ namespace Antmicro.OptionsParser
                 {
                     arg = arg.Remove(pOpt.Descriptor.LocalPosition - shift, pOpt.Descriptor.Length);
                     shift += pOpt.Descriptor.Length;
+                    
+                    if(pOpt.HasArgument)
+                    {
+                        // skip next argument as it was parsed by this option
+                        i++;
+                    }
                 }
 
                 if(arg != "-" && arg.Length > 0)

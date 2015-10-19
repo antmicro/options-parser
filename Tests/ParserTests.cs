@@ -277,6 +277,20 @@ namespace Antmicro.OptionsParser.Tests
             Assert.AreEqual('B', parser.ParsedOptions.Last().ShortName);
             Assert.AreEqual("-w", parser.RecreateUnparsedArguments());
         }
+        
+        [Test]
+        public void ShouldNotRecreatedParsedValue()
+        {
+            var args = new [] { "--switch", "value" };
+            var parser = new OptionsParser();
+            parser.WithOption<string>("switch");
+            
+            parser.Parse(args);
+            
+            Assert.AreEqual(1, parser.ParsedOptions.Count());
+            Assert.AreEqual(args[1], parser.ParsedOptions.First().Value);
+            Assert.IsEmpty(parser.RecreateUnparsedArguments());
+        }
 
         [Test]
         public void ShouldRemoveEmptyShortFlagPrefix()
