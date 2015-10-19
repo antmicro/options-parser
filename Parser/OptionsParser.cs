@@ -301,7 +301,7 @@ namespace Antmicro.OptionsParser
                 forceHelp = true;
             }
 
-            if(isHelpSelected || forceHelp)
+            if((helpOption != null) && (isHelpSelected || forceHelp))
             {
                 // help option is special case - we should present help and set flag
                 helpOption.PrintHelp(this);
