@@ -70,7 +70,7 @@ namespace Antmicro.OptionsParser
 
         public string LongName { get; protected set; }
 
-        public string Description { get; protected set; }
+        public string Description { get; set; }
 
         public object Value { get; set; }
 
