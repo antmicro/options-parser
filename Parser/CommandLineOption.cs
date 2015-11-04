@@ -15,6 +15,27 @@ namespace Antmicro.OptionsParser
         public CommandLineOption(char shortName) : base(shortName, null, typeof(T))
         {
         }
+        
+        public override object Value 
+        {
+            get 
+            {
+                return value;
+            }
+            set 
+            {
+                this.value = (T)value;
+                var parsed = Parsed;
+                if(parsed != null)
+                {
+                    parsed(this, this.value);
+                }
+            }
+        }
+        
+        public event Action<CommandLineOption<T>, T> Parsed;
+        
+        private T value;
     }
 
     public class CommandLineOption : ICommandLineOption, IEquatable<CommandLineOption>
@@ -72,7 +93,7 @@ namespace Antmicro.OptionsParser
 
         public string Description { get; set; }
 
-        public object Value { get; set; }
+        public virtual object Value { get; set; }
 
         public virtual bool HasArgument { get; protected set; }
 
