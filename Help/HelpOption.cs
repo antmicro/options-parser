@@ -8,6 +8,11 @@ namespace Antmicro.OptionsParser
 {
     public class HelpOption : CommandLineOption<bool>
     {
+        public static HelpOption CreateInstance()
+        {
+            return new HelpOption(new ApplicationInfo());
+        }
+        
         public static HelpOption CreateInstance<T>()
         {
             var appInfo = new ApplicationInfo();

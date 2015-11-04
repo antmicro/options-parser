@@ -55,6 +55,11 @@ namespace Antmicro.OptionsParser
         /// <returns>True if parsing was sucessful and 'help' option was not detected. False when 'help' was encountered.</returns>
         public bool Parse<T>(T option, string[] args)
         {
+            helpProvider = HelpOption.CreateInstance<T>();
+            helpProvider.CustomFooterGenerator = configuration.CustomFooterGenerator;
+            helpProvider.CustomOptionEntryHelpGenerator = configuration.CustomOptionEntryHelpGenerator;
+            helpProvider.CustomUsageLineGenerator = configuration.CustomUsageLineGenerator;
+            
             foreach(var property in typeof(T).GetProperties())
             {
                 var positionalAttribute = property.GetCustomAttribute<PositionalArgumentAttribute>();
@@ -83,12 +88,7 @@ namespace Antmicro.OptionsParser
 
             if(configuration.GenerateHelp)
             {
-                var help = HelpOption.CreateInstance<T>();
-                help.CustomFooterGenerator = configuration.CustomFooterGenerator;
-                help.CustomOptionEntryHelpGenerator = configuration.CustomOptionEntryHelpGenerator;
-                help.CustomUsageLineGenerator = configuration.CustomUsageLineGenerator;
-                
-                options.Add(help);
+                options.Add(helpProvider);
             }
 
             InnerParse(args);
@@ -117,6 +117,7 @@ namespace Antmicro.OptionsParser
         /// <returns>True if parsing was sucessful and 'help' option was not detected. False when 'help' was encountered.</returns>
         public bool Parse(string[] args)
         {
+            helpProvider = HelpOption.CreateInstance();
             InnerParse(args);
             return Validate();
         }
@@ -249,9 +250,8 @@ namespace Antmicro.OptionsParser
 
         private bool Validate()
         {
-            var helpOption = options.OfType<HelpOption>().SingleOrDefault();
             var forceHelp = false;
-            var isHelpSelected = (helpOption != null && parsedOptions.Contains(helpOption));
+            var isHelpSelected = parsedOptions.Contains(helpProvider);
             try
             {
                 var missingValue = values.FirstOrDefault(x => x.IsRequired && !x.IsSet);
@@ -307,10 +307,10 @@ namespace Antmicro.OptionsParser
                 forceHelp = true;
             }
 
-            if((helpOption != null) && (isHelpSelected || forceHelp))
+            if(isHelpSelected || forceHelp)
             {
                 // help option is special case - we should present help and set flag
-                helpOption.PrintHelp(this);
+                helpProvider.PrintHelp(this);
                 return false;
             }
 
@@ -325,6 +325,7 @@ namespace Antmicro.OptionsParser
         private readonly HashSet<ICommandLineOption> options;
         private CustomValidationMethod customValidationMethod;
         private int currentValuesCount;
+        private HelpOption helpProvider;
     }
 
     internal delegate bool CustomValidationMethod(out string errorMessage);
