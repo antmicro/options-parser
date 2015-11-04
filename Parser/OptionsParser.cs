@@ -265,7 +265,7 @@ namespace Antmicro.OptionsParser
                 {
                     if(!parsedOptions.Contains(requiredOption))
                     {
-                        throw new ValidationException(string.Format("Required option '{0}' is missing.", requiredOption));
+                        throw new ValidationException(string.Format("Required option '{0}' is missing.", requiredOption.LongName ?? requiredOption.ShortName.ToString()));
                     }
                 }
 
