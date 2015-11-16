@@ -17,16 +17,16 @@ namespace Antmicro.OptionsParser
             {
                 return null;
             }
+            
+            if(state != TokenizerState.PositionalValues && input[position] == EscapeMarker)
+            {
+                ReadNextString();
+                state = TokenizerState.PositionalValues;
+            }
 
             if(state == TokenizerState.PositionalValues)
             {
                 return new PositionalArgumentToken(ReadNextString(), GetCurrentPosition());
-            }
-
-            if(input[position] == string.Format("{0}{0}", FlagCharacter))
-            {
-                ReadNextString();
-                state = TokenizerState.PositionalValues;
             }
 
             var location = GetCurrentPosition();
@@ -101,6 +101,8 @@ namespace Antmicro.OptionsParser
 
         public const char NullCharacter = '\0';
         public const char EndOfString = '\x1';
+        public const char FlagCharacter = '-';
+        public const string EscapeMarker = "--";
 
         private char ReadChar()
         {
@@ -178,8 +180,7 @@ namespace Antmicro.OptionsParser
         private int markedStringPosition;
         private TokenizerState state;
         private readonly string[] input;
-
-        private const char FlagCharacter = '-';
+      
         private const char Space = ' ';
         private const char AssignmentOperator = '=';
 

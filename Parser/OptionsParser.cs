@@ -124,11 +124,18 @@ namespace Antmicro.OptionsParser
 
         public string RecreateUnparsedArguments()
         {
+            var escapeMarkerDetected = false;
             var bldr = new StringBuilder();
             for(int i = 0; i < parsedArgs.Length; i++)
             {
-                var shift = 0;
                 var arg = parsedArgs[i];
+                if(!escapeMarkerDetected && arg == Tokenizer.EscapeMarker)
+                {
+                    escapeMarkerDetected = true;
+                    continue;
+                }
+                
+                var shift = 0;
                 var pOpts = ParsedOptions.Cast<IArgument>().Union(Values).Where(x => x.Descriptor.Index == i).OrderBy(y => y.Descriptor.LocalPosition).ToList();
                 foreach (var pOpt in pOpts)
                 {

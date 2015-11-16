@@ -427,6 +427,22 @@ namespace Antmicro.OptionsParser.Tests
             Assert.AreEqual("test", parser.RecreateUnparsedArguments());
         }
         
+        [Test]
+        public void ShouldNotParseAfterDoubleHyphen()
+        {
+            var args = new [] { "--", "--value", "test" };
+            var parser = new OptionsParser(new ParserConfiguration { AllowUnexpectedArguments = true });
+            var options = new OptionsWithInt();
+            parser.Parse(options, args);
+            
+            Assert.AreEqual(-1, options.Value);
+            Assert.AreEqual(0, parser.ParsedOptions.Count());
+            Assert.AreEqual(2, parser.UnexpectedArguments.Count());
+            Assert.AreEqual("--value", ((PositionalArgument)parser.UnexpectedArguments.ElementAt(0)).Value);
+            Assert.AreEqual("test", ((PositionalArgument)parser.UnexpectedArguments.ElementAt(1)).Value);
+            Assert.AreEqual("--value test", parser.RecreateUnparsedArguments());
+        }
+        
         private class OptionsWithInt
         {
             [DefaultValue(-1)]
