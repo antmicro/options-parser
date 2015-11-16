@@ -114,6 +114,22 @@ namespace Antmicro.OptionsParser.Tests
             Assert.AreEqual('x', ((ICommandLineOption)parser.UnexpectedArguments.ElementAt(0)).ShortName);
             Assert.AreEqual("value with whitespace", ((PositionalArgument)parser.UnexpectedArguments.ElementAt(1)).Value);
         }
+        
+        [Test]
+        public void ShouldParseOptionValueWithHyphen()
+        {
+            var args = new [] { "-c", "value-with-hyphen" };
+            var parser = new OptionsParser();
+            parser.WithOption<string>('c');
+
+            parser.Parse(args);
+
+            Assert.AreEqual(1, parser.ParsedOptions.Count());
+            Assert.AreEqual('c', parser.ParsedOptions.First().ShortName);
+            Assert.AreEqual("value-with-hyphen", parser.ParsedOptions.First().Value);
+
+            Assert.AreEqual(0, parser.UnexpectedArguments.Count());
+        }
 
         [Test]
         public void ShouldThrowAnExceptionForShortOptionRequiringValueWhenThereIsNone()
