@@ -24,18 +24,18 @@ namespace Antmicro.OptionsParser
             }
             set 
             {
-                this.value = (T)value;
+                this.value = value;
                 var parsed = Parsed;
                 if(parsed != null)
                 {
-                    parsed(this, this.value);
+                    parsed(this, (T)this.value);
                 }
             }
         }
         
         public event Action<CommandLineOption<T>, T> Parsed;
         
-        private T value;
+        private object value;
     }
 
     public class CommandLineOption : ICommandLineOption, IEquatable<CommandLineOption>

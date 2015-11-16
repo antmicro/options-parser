@@ -20,6 +20,12 @@ namespace Antmicro.OptionsParser
 
         public static bool TryParse(string str, Type type, out object value)
         {
+            if(str == null)
+            {
+                value = null;
+                return false;
+            }
+            
             if(type == typeof(string))
             {
                 value = str;
