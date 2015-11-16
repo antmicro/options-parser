@@ -25,7 +25,7 @@ namespace Antmicro.OptionsParser
             UnderlyingProperty = pinfo;
 
             IsRequired = (pinfo.GetCustomAttribute<RequiredAttribute>() != null);
-            HasArgument = (pinfo.PropertyType != typeof(bool));
+            AcceptsArgument = (pinfo.PropertyType != typeof(bool));
 
             var defaultValueAttribute = pinfo.GetCustomAttribute<DefaultValueAttribute>();
             if(defaultValueAttribute != null)

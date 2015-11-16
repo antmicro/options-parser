@@ -413,6 +413,26 @@ namespace Antmicro.OptionsParser.Tests
             Assert.AreEqual(Enum.Y, options.Value);
         }
         
+        [Test]
+        public void ShouldHandleIntOptionWithDefaultValueFollowedByString()
+        {
+            var args = new [] { "--value", "test" };
+            var parser = new OptionsParser(new ParserConfiguration { AllowUnexpectedArguments = true });
+            var options = new OptionsWithInt();
+            parser.Parse(options, args);
+            
+            Assert.AreEqual(-1, options.Value);
+            Assert.AreEqual(1, parser.UnexpectedArguments.Count());
+            Assert.AreEqual("test", ((PositionalArgument)parser.UnexpectedArguments.First()).Value);
+            Assert.AreEqual("test", parser.RecreateUnparsedArguments());
+        }
+        
+        private class OptionsWithInt
+        {
+            [DefaultValue(-1)]
+            public int Value { get; set; }
+        }
+        
         private class OptionsWithPositionalEnumArgument
         {
             [PositionalArgument(0)]

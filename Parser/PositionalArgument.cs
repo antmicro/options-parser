@@ -69,6 +69,7 @@ namespace Antmicro.OptionsParser
         }
         
         public bool HasArgument { get { return false; } }
+        public bool AcceptsArgument { get { return false; } }
         
         public string Name { get; private set; }
         public string Description { get; private set; }

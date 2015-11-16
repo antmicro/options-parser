@@ -135,7 +135,7 @@ namespace Antmicro.OptionsParser
                     arg = arg.Remove(pOpt.Descriptor.LocalPosition - shift, pOpt.Descriptor.Length);
                     shift += pOpt.Descriptor.Length;
                     
-                    if(pOpt.HasArgument)
+                    if(pOpt.HasArgument && pOpt.AcceptsArgument)
                     {
                         // skip next argument as it was parsed by this option
                         i++;
@@ -184,7 +184,7 @@ namespace Antmicro.OptionsParser
                     }
                     else
                     {
-                        var arg = new PositionalArgument(((PositionalArgumentToken)token).Value);
+                        var arg = new PositionalArgument(((PositionalArgumentToken)token).Value) { Descriptor = token.Descriptor };
                         unexpectedArguments.Add(arg);
                     }
                 }
@@ -193,10 +193,17 @@ namespace Antmicro.OptionsParser
                     var foundOption = options.SingleOrDefault(x => x.LongName == ((LongNameToken)token).Name);
                     if(foundOption != null)
                     {
-                        if(foundOption.HasArgument)
+                        if(foundOption.AcceptsArgument)
                         {
-                            foundOption.ParseArgument(tokenizer.ReadUntilTheEndOfString());
-                            tokenizer.MoveToTheNextString();
+                            tokenizer.MarkPosition();
+                            if(foundOption.ParseArgument(tokenizer.ReadUntilTheEndOfString()))
+                            {
+                                tokenizer.MoveToTheNextString();
+                            }
+                            else
+                            {
+                                tokenizer.ResetPosition();
+                            }
                         }
 
                         foundOption.Descriptor = token.Descriptor.WithLengthChangedBy(2); // -- prefix
@@ -217,8 +224,9 @@ namespace Antmicro.OptionsParser
                     if(foundOption != null)
                     {
                         int additionalLength = 0;
-                        if(foundOption.HasArgument)
+                        if(foundOption.AcceptsArgument)
                         {
+                            tokenizer.MarkPosition();
                             var argumentString = tokenizer.ReadUntilTheEndOfString();
                             if(argumentString == string.Empty)
                             {
@@ -229,7 +237,10 @@ namespace Antmicro.OptionsParser
                             if(argumentString != null)
                             {
                                 additionalLength = argumentString.Length;
-                                foundOption.ParseArgument(argumentString);
+                                if(!foundOption.ParseArgument(argumentString))
+                                {
+                                    tokenizer.ResetPosition();
+                                }
                             }
                         }
 
@@ -271,7 +282,7 @@ namespace Antmicro.OptionsParser
 
                 foreach(var parsed in parsedOptions)
                 {
-                    if(parsed.Value == null && parsed.HasArgument)
+                    if(!parsed.HasArgument && parsed.AcceptsArgument)
                     {
                         throw new ValidationException(string.Format("Option '{0}' requires parameter of type '{1}'", parsed.LongName ?? parsed.ShortName.ToString(), parsed.OptionType.Name));
                     }

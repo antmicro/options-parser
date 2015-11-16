@@ -85,6 +85,18 @@ namespace Antmicro.OptionsParser
             return result;
         }
 
+        public void MarkPosition()
+        {
+            markedPosition = position;
+            markedStringPosition = stringPosition;
+        }
+
+        public void ResetPosition()
+        {
+            position = markedPosition;
+            stringPosition = markedStringPosition;
+        }
+
         public bool Finished { get { return (position == input.Length); } }
 
         public const char NullCharacter = '\0';
@@ -162,6 +174,8 @@ namespace Antmicro.OptionsParser
 
         private int position;
         private int stringPosition;
+        private int markedPosition;
+        private int markedStringPosition;
         private TokenizerState state;
         private readonly string[] input;
 

@@ -46,7 +46,7 @@ namespace Antmicro.OptionsParser
             LongName = longName;
             OptionType = type;
 
-            HasArgument = (OptionType != typeof(bool));
+            AcceptsArgument = (OptionType != typeof(bool));
             Delimiter = ';';
         }
 
@@ -77,6 +77,7 @@ namespace Antmicro.OptionsParser
                 Value = parsedValue;
             }
             
+            HasArgument = true;
             return true;
         }
 
@@ -95,7 +96,9 @@ namespace Antmicro.OptionsParser
 
         public virtual object Value { get; set; }
 
-        public virtual bool HasArgument { get; protected set; }
+        public virtual bool AcceptsArgument { get; protected set; }
+        
+        public bool HasArgument { get; protected set; }
 
         public bool IsRequired { get; protected set; }
 
