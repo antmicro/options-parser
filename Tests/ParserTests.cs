@@ -392,6 +392,24 @@ namespace Antmicro.OptionsParser.Tests
         }
         
         [Test]
+        public void ShouldParseOptionWithMultipleValuesWithDefaultDelimiterValue()
+        {
+            var args = new [] { "-m", "this;is;a;test" };
+            var parser = new OptionsParser();
+            var options = new OptionsWithMultipleValuesWithDefaultDelimiterValue();
+            parser.Parse(options, args);
+            
+            Assert.AreEqual(4, options.Values.Length);
+            Assert.AreEqual("this", options.Values[0]);
+            Assert.AreEqual("is", options.Values[1]);
+            Assert.AreEqual("a", options.Values[2]);
+            Assert.AreEqual("test", options.Values[3]);
+            
+            Assert.AreEqual(0, parser.Values.Count());
+            Assert.AreEqual(0, parser.UnexpectedArguments.Count());
+        }
+        
+        [Test]
         public void ShouldParseEnum()
         {
             var args = new [] { "-v", "Y" };
@@ -471,6 +489,12 @@ namespace Antmicro.OptionsParser.Tests
         {
             [Name('v'), NumberOfElements(3), Delimiter(':')]
             public int[] Values { get; set; }
+        }
+
+        private class OptionsWithMultipleValuesWithDefaultDelimiterValue
+        {
+            [Name('m')]
+            public string[] Values { get; set; }
         }
         
         private class OptionsWithBool
