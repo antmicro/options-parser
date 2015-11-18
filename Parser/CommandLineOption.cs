@@ -40,14 +40,13 @@ namespace Antmicro.OptionsParser
 
     public class CommandLineOption : ICommandLineOption, IEquatable<CommandLineOption>
     {
-        public CommandLineOption(char shortName, string longName, Type type)
+        public CommandLineOption(char shortName, string longName, Type type) : this()
         {
             ShortName = shortName;
             LongName = longName;
             OptionType = type;
 
             AcceptsArgument = (OptionType != typeof(bool));
-            Delimiter = ';';
         }
 
         public virtual bool ParseArgument(string arg)
@@ -110,6 +109,7 @@ namespace Antmicro.OptionsParser
 
         protected CommandLineOption()
         {
+            Delimiter = ';';
         }
     }
 }
