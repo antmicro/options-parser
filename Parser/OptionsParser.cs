@@ -77,7 +77,7 @@ namespace Antmicro.OptionsParser
                 }
                 else
                 {
-                    options.Add(new AutomaticCommandLineOption(property));
+                    options.Add(new CommandLineOption(option, property));
                 }
             }
 
@@ -93,11 +93,6 @@ namespace Antmicro.OptionsParser
 
             InnerParse(args);
 
-            foreach(var opt in parsedOptions.OfType<AutomaticCommandLineOption>().Union(options.OfType<AutomaticCommandLineOption>().Where(x => x.HasDefaultValue)))
-            {
-                opt.UnderlyingProperty.SetValue(option, opt.Value);
-            }
-            
             foreach(var property in typeof(T).GetProperties())
             {
                 var attribute = property.GetCustomAttribute<PositionalArgumentAttribute>();

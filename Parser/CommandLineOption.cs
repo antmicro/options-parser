@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Reflection;
 
 namespace Antmicro.OptionsParser
 {
@@ -20,22 +22,21 @@ namespace Antmicro.OptionsParser
         {
             get 
             {
-                return value;
+                return base.Value;
             }
             set 
             {
-                this.value = value;
+                base.Value = value;
+
                 var parsed = Parsed;
                 if(parsed != null)
                 {
-                    parsed(this, (T)this.value);
+                    parsed(this, (T)base.Value);
                 }
             }
         }
         
         public event Action<CommandLineOption<T>, T> Parsed;
-        
-        private object value;
     }
 
     public class CommandLineOption : ICommandLineOption, IEquatable<CommandLineOption>
@@ -47,6 +48,60 @@ namespace Antmicro.OptionsParser
             OptionType = type;
 
             AcceptsArgument = (OptionType != typeof(bool));
+        }
+
+        public CommandLineOption(object source, PropertyInfo pinfo) : this()
+        {
+            var nameAttribute = pinfo.GetCustomAttribute<NameAttribute>();
+            if(nameAttribute != null)
+            {
+                ShortName = nameAttribute.ShortName;
+                LongName = nameAttribute.LongName;
+            }
+            else
+            {
+                ShortName = char.ToLower(pinfo.Name.ElementAt(0));
+                LongName = ShortName + pinfo.Name.Substring(1);
+            }
+
+            OptionType = pinfo.PropertyType;
+
+            underlyingProperty = pinfo;
+            this.source = source;
+
+            IsRequired = (pinfo.GetCustomAttribute<RequiredAttribute>() != null);
+            AcceptsArgument = (pinfo.PropertyType != typeof(bool));
+
+            var defaultValueAttribute = pinfo.GetCustomAttribute<DefaultValueAttribute>();
+            if(defaultValueAttribute != null)
+            {
+                if(OptionType != defaultValueAttribute.DefaultValue.GetType())
+                {
+                    throw new ArgumentException(string.Format("Default value for option '{0}' is of unexpected type.", LongName ?? ShortName.ToString()));
+                }
+                HasDefaultValue = true;
+                SetValue(defaultValueAttribute.DefaultValue);
+            }
+
+            var descriptionAttribute = pinfo.GetCustomAttribute<DescriptionAttribute>();
+            if(descriptionAttribute != null)
+            {
+                Description = descriptionAttribute.Value;
+            }
+
+            if(OptionType.IsArray)
+            {
+                var numberOfElementsAttribute = pinfo.GetCustomAttribute<NumberOfElementsAttribute>();
+                if(numberOfElementsAttribute != null)
+                {
+                    MaxElements = numberOfElementsAttribute.Max;
+                }
+                var delimiterAttribute = pinfo.GetCustomAttribute<DelimiterAttribute>();
+                if(delimiterAttribute != null)
+                {
+                    Delimiter = delimiterAttribute.Delimiter;
+                }
+            }
         }
 
         public virtual bool ParseArgument(string arg)
@@ -93,9 +148,7 @@ namespace Antmicro.OptionsParser
 
         public string Description { get; set; }
 
-        public virtual object Value { get; set; }
-
-        public virtual bool AcceptsArgument { get; protected set; }
+        public bool AcceptsArgument { get; protected set; }
         
         public bool HasArgument { get; protected set; }
 
@@ -107,10 +160,38 @@ namespace Antmicro.OptionsParser
         
         public int MaxElements { get; set; }
 
-        protected CommandLineOption()
+        public bool HasDefaultValue { get; private set; }
+
+        public virtual object Value
+        {
+            get
+            {
+                return value;
+            }
+
+            set
+            {
+                SetValue(value);
+            }
+        }
+
+        private CommandLineOption()
         {
             Delimiter = ';';
         }
+
+        private void SetValue(object v)
+        {
+            value = v;
+            if(underlyingProperty != null && source != null)
+            {
+                underlyingProperty.SetValue(source, value);
+            }
+        }
+
+        private readonly PropertyInfo underlyingProperty;
+        private readonly object source;
+        private object value;
     }
 }
 

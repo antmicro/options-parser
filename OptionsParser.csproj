@@ -41,7 +41,6 @@
     <Compile Include="Parser\PositionalArgument.cs" />
     <Compile Include="Parser\Token.cs" />
     <Compile Include="Parser\Tokenizer.cs" />
-    <Compile Include="Parser\AutomaticCommandLineOption.cs" />
     <Compile Include="Parser\ParseHelper.cs" />
     <Compile Include="Validation\RequiredAttribute.cs" />
     <Compile Include="Description\NameAttribute.cs" />
