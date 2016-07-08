@@ -79,8 +79,8 @@ namespace Antmicro.OptionsParser
                 {
                     throw new ArgumentException(string.Format("Default value for option '{0}' is of unexpected type.", LongName ?? ShortName.ToString()));
                 }
-                HasDefaultValue = true;
                 SetValue(defaultValueAttribute.DefaultValue);
+                DefaultValue = defaultValueAttribute.DefaultValue;
             }
 
             var descriptionAttribute = pinfo.GetCustomAttribute<DescriptionAttribute>();
@@ -160,7 +160,7 @@ namespace Antmicro.OptionsParser
         
         public int MaxElements { get; set; }
 
-        public bool HasDefaultValue { get; private set; }
+        public object DefaultValue { get; private set; }
 
         public virtual object Value
         {
