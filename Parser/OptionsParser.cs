@@ -305,6 +305,14 @@ namespace Antmicro.OptionsParser
                     }
                 }
 
+                foreach(var parsed in parsedOptions.GroupBy(x => x.Flag))
+                {
+                    if(parsed.Count() > 1 && !parsed.Key.AllowMultipleOccurences)
+                    {
+                        throw new ValidationException(string.Format("Option '{0}' occures more than once", parsed.Key.LongName ?? parsed.Key.ShortName.ToString()));
+                    }
+                }
+
                 if(customValidationMethod != null)
                 {
                     string errorMessage;

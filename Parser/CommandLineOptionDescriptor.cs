@@ -21,6 +21,7 @@ namespace Antmicro.OptionsParser
             OptionType = type;
 
             AcceptsArgument = (OptionType != typeof(bool));
+            AllowMultipleOccurences = false;
         }
 
         public CommandLineOptionDescriptor(PropertyInfo pinfo) : this()
@@ -43,6 +44,7 @@ namespace Antmicro.OptionsParser
 
             IsRequired = (pinfo.GetCustomAttribute<RequiredAttribute>() != null);
             AcceptsArgument = (pinfo.PropertyType != typeof(bool));
+            AllowMultipleOccurences = pinfo.PropertyType.IsArray;
 
             var defaultValueAttribute = pinfo.GetCustomAttribute<DefaultValueAttribute>();
             if(defaultValueAttribute != null)
@@ -94,6 +96,8 @@ namespace Antmicro.OptionsParser
         public char ShortName { get; private set; }
 
         public PropertyInfo UnderlyingProperty { get; private set; }
+
+        public bool AllowMultipleOccurences { get; private set; }
 
         private CommandLineOptionDescriptor()
         {

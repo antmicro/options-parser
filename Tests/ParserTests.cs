@@ -461,7 +461,17 @@ namespace Antmicro.OptionsParser.Tests
             Assert.AreEqual("test", parser.UnexpectedArguments.ElementAt(1).Value);
             Assert.AreEqual("--value test", parser.RecreateUnparsedArguments());
         }
-        
+
+        [Test]
+        [ExpectedException(typeof(ValidationException))]
+        public void ShouldThrowAnExceptionOnUnexpectedMultipleOccurenceOfArgument()
+        {
+            var args = new[] { "--value", "5", "--value", "6" };
+            var parser = new OptionsParser(new ParserConfiguration { ThrowValidationException = true });
+            var options = new OptionsWithInt();
+            parser.Parse(options, args);
+        }
+
         private class OptionsWithInt
         {
             [DefaultValue(-1)]
