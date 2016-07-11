@@ -1,23 +1,13 @@
 ﻿using System;
-using System.Linq;
-using System.Reflection;
 
 namespace Antmicro.OptionsParser
 {
     public class CommandLineOption<T> : CommandLineOption
     {
-        public CommandLineOption(char shortName, string longName) : base(shortName, longName, typeof(T))
+        public CommandLineOption(CommandLineOptionDescriptor descriptor) : base(descriptor)
         {
         }
 
-        public CommandLineOption(string longName) : base(Tokenizer.NullCharacter, longName, typeof(T))
-        {
-        }
-
-        public CommandLineOption(char shortName) : base(shortName, null, typeof(T))
-        {
-        }
-        
         public override object Value 
         {
             get 
@@ -39,82 +29,24 @@ namespace Antmicro.OptionsParser
         public event Action<CommandLineOption<T>, T> Parsed;
     }
 
-    public class CommandLineOption : ICommandLineOption, IEquatable<CommandLineOption>
+    public class CommandLineOption : IParsedArgument
     {
-        public CommandLineOption(char shortName, string longName, Type type) : this()
+        public CommandLineOption(IFlag descriptor)
         {
-            ShortName = shortName;
-            LongName = longName;
-            OptionType = type;
-
-            AcceptsArgument = (OptionType != typeof(bool));
+            Flag = descriptor;
         }
 
-        public CommandLineOption(object source, PropertyInfo pinfo) : this()
-        {
-            var nameAttribute = pinfo.GetCustomAttribute<NameAttribute>();
-            if(nameAttribute != null)
-            {
-                ShortName = nameAttribute.ShortName;
-                LongName = nameAttribute.LongName;
-            }
-            else
-            {
-                ShortName = char.ToLower(pinfo.Name.ElementAt(0));
-                LongName = ShortName + pinfo.Name.Substring(1);
-            }
-
-            OptionType = pinfo.PropertyType;
-
-            underlyingProperty = pinfo;
-            this.source = source;
-
-            IsRequired = (pinfo.GetCustomAttribute<RequiredAttribute>() != null);
-            AcceptsArgument = (pinfo.PropertyType != typeof(bool));
-
-            var defaultValueAttribute = pinfo.GetCustomAttribute<DefaultValueAttribute>();
-            if(defaultValueAttribute != null)
-            {
-                if(OptionType != defaultValueAttribute.DefaultValue.GetType())
-                {
-                    throw new ArgumentException(string.Format("Default value for option '{0}' is of unexpected type.", LongName ?? ShortName.ToString()));
-                }
-                SetValue(defaultValueAttribute.DefaultValue);
-                DefaultValue = defaultValueAttribute.DefaultValue;
-            }
-
-            var descriptionAttribute = pinfo.GetCustomAttribute<DescriptionAttribute>();
-            if(descriptionAttribute != null)
-            {
-                Description = descriptionAttribute.Value;
-            }
-
-            if(OptionType.IsArray)
-            {
-                var numberOfElementsAttribute = pinfo.GetCustomAttribute<NumberOfElementsAttribute>();
-                if(numberOfElementsAttribute != null)
-                {
-                    MaxElements = numberOfElementsAttribute.Max;
-                }
-                var delimiterAttribute = pinfo.GetCustomAttribute<DelimiterAttribute>();
-                if(delimiterAttribute != null)
-                {
-                    Delimiter = delimiterAttribute.Delimiter;
-                }
-            }
-        }
-
-        public virtual bool ParseArgument(string arg)
+        public bool ParseArgument(string arg)
         {
             object parsedValue;
-            if(OptionType.IsArray)
+            if(Flag.OptionType.IsArray)
             {
-                var values = (MaxElements > 0) ? arg.Split(new[] { Delimiter }, MaxElements) : arg.Split(Delimiter); 
-                var array = Array.CreateInstance(OptionType.GetElementType(), values.Length);
+                var values = (Flag.MaxElements > 0) ? arg.Split(new[] { Flag.Delimiter }, Flag.MaxElements) : arg.Split(Flag.Delimiter); 
+                var array = Array.CreateInstance(Flag.OptionType.GetElementType(), values.Length);
                 
                 for(int i = 0; i < values.Length; i++)
                 {
-                    if(!ParseHelper.TryParse(values[i], OptionType.GetElementType(), out parsedValue))
+                    if(!ParseHelper.TryParse(values[i], Flag.OptionType.GetElementType(), out parsedValue))
                     {
                         return false;
                     }
@@ -124,7 +56,7 @@ namespace Antmicro.OptionsParser
             }
             else
             {
-                if(!ParseHelper.TryParse(arg, OptionType, out parsedValue))
+                if(!ParseHelper.TryParse(arg, Flag.OptionType, out parsedValue))
                 {
                     return false;
                 }
@@ -135,63 +67,13 @@ namespace Antmicro.OptionsParser
             return true;
         }
 
-        public bool Equals(CommandLineOption other)
-        {
-            return (ShortName == other.ShortName && LongName == other.LongName);
-        }
+        public IFlag Flag { get; private set; }
 
-        public Type OptionType { get; protected set; }
-
-        public char ShortName { get; protected set; }
-
-        public string LongName { get; protected set; }
-
-        public string Description { get; set; }
-
-        public bool AcceptsArgument { get; protected set; }
-        
         public bool HasArgument { get; protected set; }
 
-        public bool IsRequired { get; protected set; }
-
         public ElementDescriptor Descriptor { get; set; }
-        
-        public char Delimiter { get; set; }
-        
-        public int MaxElements { get; set; }
 
-        public object DefaultValue { get; private set; }
-
-        public virtual object Value
-        {
-            get
-            {
-                return value;
-            }
-
-            set
-            {
-                SetValue(value);
-            }
-        }
-
-        private CommandLineOption()
-        {
-            Delimiter = ';';
-        }
-
-        private void SetValue(object v)
-        {
-            value = v;
-            if(underlyingProperty != null && source != null)
-            {
-                underlyingProperty.SetValue(source, value);
-            }
-        }
-
-        private readonly PropertyInfo underlyingProperty;
-        private readonly object source;
-        private object value;
+        public virtual object Value { get; set; }
     }
 }
 

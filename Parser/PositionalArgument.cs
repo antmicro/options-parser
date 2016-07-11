@@ -3,7 +3,7 @@ using System;
 
 namespace Antmicro.OptionsParser
 {
-    public class PositionalArgument : IArgument
+    public class PositionalArgument : IParsedArgument
     {
         public PositionalArgument(string value)
         {
@@ -67,6 +67,8 @@ namespace Antmicro.OptionsParser
                 return underlyingProperty != null && underlyingProperty.GetCustomAttribute<RequiredAttribute>() != null;
             }
         }
+
+        public IFlag Flag { get { return null; } }
         
         public bool HasArgument { get { return false; } }
         public bool AcceptsArgument { get { return false; } }

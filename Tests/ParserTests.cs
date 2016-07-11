@@ -18,7 +18,7 @@ namespace Antmicro.OptionsParser.Tests
             parser.Parse(args);
 
             Assert.AreEqual(1, parser.ParsedOptions.Count());
-            Assert.AreEqual('c', parser.ParsedOptions.First().ShortName);
+            Assert.AreEqual('c', parser.ParsedOptions.First().Flag.ShortName);
         }
         
         [Test]
@@ -44,7 +44,7 @@ namespace Antmicro.OptionsParser.Tests
             parser.Parse(args);
 
             Assert.AreEqual(1, parser.ParsedOptions.Count());
-            Assert.AreEqual("long", parser.ParsedOptions.First().LongName);
+            Assert.AreEqual("long", parser.ParsedOptions.First().Flag.LongName);
         }
 
         [Test]
@@ -61,8 +61,9 @@ namespace Antmicro.OptionsParser.Tests
                 parser.Parse(args);
 
                 Assert.AreEqual(1, parser.ParsedOptions.Count());
-                Assert.AreEqual('l', parser.ParsedOptions.First().ShortName);
-                Assert.AreEqual("long", parser.ParsedOptions.First().LongName);
+                var flag = parser.ParsedOptions.First().Flag;
+                Assert.AreEqual('l', flag.ShortName);
+                Assert.AreEqual("long", flag.LongName);
             }
         }
 
@@ -76,10 +77,10 @@ namespace Antmicro.OptionsParser.Tests
             parser.Parse(args);
 
             Assert.AreEqual(1, parser.ParsedOptions.Count());
-            Assert.AreEqual('c', parser.ParsedOptions.First().ShortName);
+            Assert.AreEqual('c', parser.ParsedOptions.First().Flag.ShortName);
 
             Assert.AreEqual(1, parser.UnexpectedArguments.Count());
-            Assert.AreEqual('x', ((ICommandLineOption)parser.UnexpectedArguments.First()).ShortName);
+            Assert.AreEqual("x", parser.UnexpectedArguments.First().Value);
         }
 
         [Test]
@@ -92,10 +93,10 @@ namespace Antmicro.OptionsParser.Tests
             parser.Parse(args);
 
             Assert.AreEqual(1, parser.ParsedOptions.Count());
-            Assert.AreEqual("long", parser.ParsedOptions.First().LongName);
+            Assert.AreEqual("long", parser.ParsedOptions.First().Flag.LongName);
 
             Assert.AreEqual(1, parser.UnexpectedArguments.Count());
-            Assert.AreEqual("secondLong", ((ICommandLineOption)parser.UnexpectedArguments.First()).LongName);
+            Assert.AreEqual("secondLong", parser.UnexpectedArguments.First().Value);
         }
 
         [Test]
@@ -108,11 +109,11 @@ namespace Antmicro.OptionsParser.Tests
             parser.Parse(args);
 
             Assert.AreEqual(1, parser.ParsedOptions.Count());
-            Assert.AreEqual('c', parser.ParsedOptions.First().ShortName);
+            Assert.AreEqual('c', parser.ParsedOptions.First().Flag.ShortName);
 
             Assert.AreEqual(2, parser.UnexpectedArguments.Count());
-            Assert.AreEqual('x', ((ICommandLineOption)parser.UnexpectedArguments.ElementAt(0)).ShortName);
-            Assert.AreEqual("value with whitespace", ((PositionalArgument)parser.UnexpectedArguments.ElementAt(1)).Value);
+            Assert.AreEqual("x", parser.UnexpectedArguments.ElementAt(0).Value);
+            Assert.AreEqual("value with whitespace", parser.UnexpectedArguments.ElementAt(1).Value);
         }
         
         [Test]
@@ -125,7 +126,7 @@ namespace Antmicro.OptionsParser.Tests
             parser.Parse(args);
 
             Assert.AreEqual(1, parser.ParsedOptions.Count());
-            Assert.AreEqual('c', parser.ParsedOptions.First().ShortName);
+            Assert.AreEqual('c', parser.ParsedOptions.First().Flag.ShortName);
             Assert.AreEqual("value-with-hyphen", parser.ParsedOptions.First().Value);
 
             Assert.AreEqual(0, parser.UnexpectedArguments.Count());
@@ -177,7 +178,7 @@ namespace Antmicro.OptionsParser.Tests
             parser.Parse(args);
 
             Assert.AreEqual(1, parser.ParsedOptions.Count());
-            Assert.AreEqual('n', parser.ParsedOptions.First().ShortName);
+            Assert.AreEqual('n', parser.ParsedOptions.First().Flag.ShortName);
             Assert.AreEqual(123, parser.ParsedOptions.First().Value);
         }
 
@@ -191,7 +192,7 @@ namespace Antmicro.OptionsParser.Tests
             parser.Parse(args);
 
             Assert.AreEqual(1, parser.ParsedOptions.Count());
-            Assert.AreEqual("number", parser.ParsedOptions.First().LongName);
+            Assert.AreEqual("number", parser.ParsedOptions.First().Flag.LongName);
             Assert.AreEqual(123, parser.ParsedOptions.First().Value);
         }
 
@@ -205,7 +206,7 @@ namespace Antmicro.OptionsParser.Tests
             parser.Parse(args);
 
             Assert.AreEqual(1, parser.ParsedOptions.Count());
-            Assert.AreEqual("long", parser.ParsedOptions.First().LongName);
+            Assert.AreEqual("long", parser.ParsedOptions.First().Flag.LongName);
             Assert.AreEqual("test", parser.ParsedOptions.First().Value);
         }
 
@@ -220,8 +221,8 @@ namespace Antmicro.OptionsParser.Tests
             parser.Parse(args);
 
             Assert.AreEqual(2, parser.ParsedOptions.Count());
-            Assert.AreEqual('n', parser.ParsedOptions.First().ShortName);
-            Assert.AreEqual('m', parser.ParsedOptions.Skip(1).First().ShortName);
+            Assert.AreEqual('n', parser.ParsedOptions.First().Flag.ShortName);
+            Assert.AreEqual('m', parser.ParsedOptions.Skip(1).First().Flag.ShortName);
             Assert.AreEqual("Value", parser.ParsedOptions.Skip(1).First().Value);
         }
 
@@ -235,7 +236,7 @@ namespace Antmicro.OptionsParser.Tests
             parser.Parse(args);
 
             Assert.AreEqual(1, parser.ParsedOptions.Count());
-            Assert.AreEqual("option", parser.ParsedOptions.First().LongName);
+            Assert.AreEqual("option", parser.ParsedOptions.First().Flag.LongName);
             Assert.AreEqual("Value with spaces", parser.ParsedOptions.First().Value);
         }
 
@@ -249,7 +250,7 @@ namespace Antmicro.OptionsParser.Tests
             parser.Parse(args);
 
             Assert.AreEqual(1, parser.ParsedOptions.Count());
-            Assert.AreEqual('n', parser.ParsedOptions.First().ShortName);
+            Assert.AreEqual('n', parser.ParsedOptions.First().Flag.ShortName);
             Assert.AreEqual(123, parser.ParsedOptions.First().Value);
         }
 
@@ -273,8 +274,8 @@ namespace Antmicro.OptionsParser.Tests
             parser.Parse(args);
 
             Assert.AreEqual(3, parser.ParsedOptions.Count());
-            Assert.AreEqual("expected", parser.ParsedOptions.First().LongName);
-            Assert.AreEqual("another-expected", parser.ParsedOptions.ElementAt(1).LongName);
+            Assert.AreEqual("expected", parser.ParsedOptions.First().Flag.LongName);
+            Assert.AreEqual("another-expected", parser.ParsedOptions.ElementAt(1).Flag.LongName);
             Assert.AreEqual(@"-x value -y1 -w ""-z'this was unexpected'""", parser.RecreateUnparsedArguments());
         }
 
@@ -289,8 +290,8 @@ namespace Antmicro.OptionsParser.Tests
             parser.Parse(args);
 
             Assert.AreEqual(2, parser.ParsedOptions.Count());
-            Assert.AreEqual('A', parser.ParsedOptions.First().ShortName);
-            Assert.AreEqual('B', parser.ParsedOptions.Last().ShortName);
+            Assert.AreEqual('A', parser.ParsedOptions.First().Flag.ShortName);
+            Assert.AreEqual('B', parser.ParsedOptions.Last().Flag.ShortName);
             Assert.AreEqual("-w", parser.RecreateUnparsedArguments());
         }
         
@@ -319,8 +320,8 @@ namespace Antmicro.OptionsParser.Tests
             parser.Parse(args);
 
             Assert.AreEqual(2, parser.ParsedOptions.Count());
-            Assert.AreEqual('A', parser.ParsedOptions.First().ShortName);
-            Assert.AreEqual('B', parser.ParsedOptions.Last().ShortName);
+            Assert.AreEqual('A', parser.ParsedOptions.First().Flag.ShortName);
+            Assert.AreEqual('B', parser.ParsedOptions.Last().Flag.ShortName);
             Assert.AreEqual(string.Empty, parser.RecreateUnparsedArguments());
         }
 
@@ -339,10 +340,10 @@ namespace Antmicro.OptionsParser.Tests
             parser.Parse(args);
 
             Assert.AreEqual(4, parser.ParsedOptions.Count());
-            Assert.AreEqual('a', parser.ParsedOptions.ElementAt(0).ShortName);
-            Assert.AreEqual('b', parser.ParsedOptions.ElementAt(1).ShortName);
-            Assert.AreEqual('c', parser.ParsedOptions.ElementAt(2).ShortName);
-            Assert.AreEqual('d', parser.ParsedOptions.ElementAt(3).ShortName);
+            Assert.AreEqual('a', parser.ParsedOptions.ElementAt(0).Flag.ShortName);
+            Assert.AreEqual('b', parser.ParsedOptions.ElementAt(1).Flag.ShortName);
+            Assert.AreEqual('c', parser.ParsedOptions.ElementAt(2).Flag.ShortName);
+            Assert.AreEqual('d', parser.ParsedOptions.ElementAt(3).Flag.ShortName);
             Assert.AreEqual(2, parser.Values.Count());
             Assert.AreEqual("value-1", parser.Values.ElementAt(0).Value);
             Assert.AreEqual("value-2", parser.Values.ElementAt(1).Value);
@@ -361,7 +362,7 @@ namespace Antmicro.OptionsParser.Tests
             Assert.AreEqual(1, parser.UnexpectedArguments.Count());
             
             Assert.AreEqual("value", options.Value);
-            Assert.AreEqual("value-2", parser.UnexpectedArguments.Cast<PositionalArgument>().First().Value);
+            Assert.AreEqual("value-2", parser.UnexpectedArguments.First().Value);
         }
         
         [Test]
@@ -441,7 +442,7 @@ namespace Antmicro.OptionsParser.Tests
             
             Assert.AreEqual(-1, options.Value);
             Assert.AreEqual(1, parser.UnexpectedArguments.Count());
-            Assert.AreEqual("test", ((PositionalArgument)parser.UnexpectedArguments.First()).Value);
+            Assert.AreEqual("test", parser.UnexpectedArguments.First().Value);
             Assert.AreEqual("test", parser.RecreateUnparsedArguments());
         }
         
@@ -456,8 +457,8 @@ namespace Antmicro.OptionsParser.Tests
             Assert.AreEqual(-1, options.Value);
             Assert.AreEqual(0, parser.ParsedOptions.Count());
             Assert.AreEqual(2, parser.UnexpectedArguments.Count());
-            Assert.AreEqual("--value", ((PositionalArgument)parser.UnexpectedArguments.ElementAt(0)).Value);
-            Assert.AreEqual("test", ((PositionalArgument)parser.UnexpectedArguments.ElementAt(1)).Value);
+            Assert.AreEqual("--value", parser.UnexpectedArguments.ElementAt(0).Value);
+            Assert.AreEqual("test", parser.UnexpectedArguments.ElementAt(1).Value);
             Assert.AreEqual("--value test", parser.RecreateUnparsedArguments());
         }
         

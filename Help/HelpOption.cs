@@ -2,11 +2,10 @@
 using System.Text;
 using System.Reflection;
 using System.Linq;
-using System.Collections.Generic;
 
 namespace Antmicro.OptionsParser
 {
-    public class HelpOption : CommandLineOption<bool>
+    public class HelpOption : CommandLineOptionDescriptor
     {
         public static HelpOption CreateInstance()
         {
@@ -81,7 +80,7 @@ namespace Antmicro.OptionsParser
             }
         }
         
-        public Func<ICommandLineOption, string> CustomOptionEntryHelpGenerator { get; set; }
+        public Func<IFlag, string> CustomOptionEntryHelpGenerator { get; set; }
 
         public Func<string, string> CustomUsageLineGenerator { get; set; }
 
@@ -111,7 +110,7 @@ namespace Antmicro.OptionsParser
             return optionBuilder.ToString();
         }
 
-        private static string GenerateOptionHelpEntry(ICommandLineOption option)
+        private static string GenerateOptionHelpEntry(IFlag option)
         {
             var optionBuilder = new StringBuilder("  ");
             if(option.ShortName != Tokenizer.NullCharacter)
@@ -173,7 +172,7 @@ namespace Antmicro.OptionsParser
                 .ToArray();
         }
 
-        private HelpOption(ApplicationInfo info) : base('h', "help")
+        private HelpOption(ApplicationInfo info) : base('h', "help", typeof(bool))
         {
             Description = "Display this help page.";
             appInfo = info;

@@ -1,17 +1,20 @@
 ﻿using System;
+using System.Reflection;
 
 namespace Antmicro.OptionsParser
 {
-    public interface ICommandLineOption : IArgument
+    public interface IFlag
     {
-        bool ParseArgument(string arg);
+        bool AcceptsArgument { get; }
         char ShortName { get; }
         string LongName { get; }
         string Description { get; }
         bool IsRequired { get; }
         char Delimiter { get; }
         Type OptionType { get; }
-        object Value { get; set; }
+        object DefaultValue { get; }
+        int MaxElements { get; }
+        PropertyInfo UnderlyingProperty { get; }
     }
 }
 

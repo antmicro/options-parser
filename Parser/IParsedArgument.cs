@@ -1,10 +1,11 @@
 ﻿namespace Antmicro.OptionsParser
 {
-    public interface IArgument
+    public interface IParsedArgument
     {
+        IFlag Flag { get; }
         bool HasArgument { get; }
-        bool AcceptsArgument { get; }
         ElementDescriptor Descriptor { get; set; }
+        object Value { get; }
     }
 }
 
