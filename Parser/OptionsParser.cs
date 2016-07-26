@@ -94,9 +94,29 @@ namespace Antmicro.OptionsParser
             InnerParse(args);
 
             // set values
-            foreach(var o in parsedOptions.Where(x => x.Flag.UnderlyingProperty != null))
+            foreach(var o in parsedOptions.Where(x => x.Flag.UnderlyingProperty != null).GroupBy(x => x.Flag))
             {
-                o.Flag.UnderlyingProperty.SetValue(option, o.Value);
+                // multi-values
+                if(o.Count() > 1)
+                {
+                    if(!o.Key.UnderlyingProperty.PropertyType.IsArray)
+                    {
+                        // if it's not an array we will throw validation exception later
+                        continue;
+                    }
+
+                    var finalValue = CreateDynamicList((dynamic)(((Array)o.First().Value).GetValue(0)));
+                    foreach(var localValue in o.Select(x => x.Value))
+                    {
+                        finalValue.AddRange((dynamic)localValue);
+                    }
+                    o.Key.UnderlyingProperty.SetValue(option, finalValue.ToArray());
+                }
+                // single-value
+                else
+                {
+                    o.Key.UnderlyingProperty.SetValue(option, o.First().Value);
+                }
             }
 
             // set default values
@@ -180,6 +200,11 @@ namespace Antmicro.OptionsParser
         public IEnumerable<IParsedArgument> ParsedOptions { get { return parsedOptions; } }
         public IEnumerable<IUnexpectedArgument> UnexpectedArguments { get { return unexpectedArguments; } }
         public IEnumerable<PositionalArgument> Values { get { return values; } }
+
+        private static List<T> CreateDynamicList<T>(T obj)
+        {
+            return new List<T>();
+        }
 
         private void InnerParse(string[] args)
         {
