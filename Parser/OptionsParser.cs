@@ -15,31 +15,31 @@ namespace Antmicro.OptionsParser
         public OptionsParser(ParserConfiguration configuration)
         {
             values = new List<PositionalArgument>();
-            options = new HashSet<ICommandLineOption>();
-            parsedOptions = new List<ICommandLineOption>();
-            unexpectedArguments = new List<IArgument>();
+            options = new HashSet<IFlag>();
+            parsedOptions = new List<IParsedArgument>();
+            unexpectedArguments = new List<IUnexpectedArgument>();
             this.configuration = configuration ?? new ParserConfiguration();
         }
 
-        public CommandLineOption<T> WithOption<T>(char shortName)
+        public OptionsParser WithOption<T>(char shortName)
         {
-            var option = new CommandLineOption<T>(shortName);
+            var option = new CommandLineOptionDescriptor(shortName, typeof(T));
             options.Add(option);
-            return option;
+            return this;
         }
 
-        public CommandLineOption<T> WithOption<T>(string longName)
+        public OptionsParser WithOption<T>(string longName)
         {
-            var option = new CommandLineOption<T>(longName);
+            var option = new CommandLineOptionDescriptor(longName, typeof(T));
             options.Add(option);
-            return option;
+            return this;
         }
 
-        public CommandLineOption<T> WithOption<T>(char shortName, string longName)
+        public OptionsParser WithOption<T>(char shortName, string longName)
         {
-            var option = new CommandLineOption<T>(shortName, longName);
+            var option = new CommandLineOptionDescriptor(shortName, longName, typeof(T));
             options.Add(option);
-            return option;
+            return this;
         }
         
         public void WithValue(string name)
@@ -77,7 +77,7 @@ namespace Antmicro.OptionsParser
                 }
                 else
                 {
-                    options.Add(new AutomaticCommandLineOption(property));
+                    options.Add(new CommandLineOptionDescriptor(property));
                 }
             }
 
@@ -93,11 +93,38 @@ namespace Antmicro.OptionsParser
 
             InnerParse(args);
 
-            foreach(var opt in parsedOptions.OfType<AutomaticCommandLineOption>().Union(options.OfType<AutomaticCommandLineOption>().Where(x => x.HasDefaultValue)))
+            // set values
+            foreach(var o in parsedOptions.Where(x => x.Flag.UnderlyingProperty != null).GroupBy(x => x.Flag))
             {
-                opt.UnderlyingProperty.SetValue(option, opt.Value);
+                // multi-values
+                if(o.Count() > 1)
+                {
+                    if(!o.Key.UnderlyingProperty.PropertyType.IsArray)
+                    {
+                        // if it's not an array we will throw validation exception later
+                        continue;
+                    }
+
+                    var finalValue = CreateDynamicList((dynamic)(((Array)o.First().Value).GetValue(0)));
+                    foreach(var localValue in o.Select(x => x.Value))
+                    {
+                        finalValue.AddRange((dynamic)localValue);
+                    }
+                    o.Key.UnderlyingProperty.SetValue(option, finalValue.ToArray());
+                }
+                // single-value
+                else
+                {
+                    o.Key.UnderlyingProperty.SetValue(option, o.First().Value);
+                }
             }
-            
+
+            // set default values
+            foreach(var o in options.Where(x => x.UnderlyingProperty != null && x.DefaultValue != null).Except(parsedOptions.Where(x => x.Value != null).Select(x => x.Flag)))
+            {
+                o.UnderlyingProperty.SetValue(option, o.DefaultValue);
+            }
+
             foreach(var property in typeof(T).GetProperties())
             {
                 var attribute = property.GetCustomAttribute<PositionalArgumentAttribute>();
@@ -136,13 +163,13 @@ namespace Antmicro.OptionsParser
                 }
                 
                 var shift = 0;
-                var pOpts = ParsedOptions.Cast<IArgument>().Union(Values).Where(x => x.Descriptor.Index == i).OrderBy(y => y.Descriptor.LocalPosition).ToList();
+                var pOpts = ParsedOptions.Cast<IParsedArgument>().Union(Values).Where(x => x.Descriptor.Index == i).OrderBy(y => y.Descriptor.LocalPosition).ToList();
                 foreach (var pOpt in pOpts)
                 {
                     arg = arg.Remove(pOpt.Descriptor.LocalPosition - shift, pOpt.Descriptor.Length);
                     shift += pOpt.Descriptor.Length;
                     
-                    if(pOpt.HasArgument && pOpt.AcceptsArgument)
+                    if(pOpt.HasArgument && pOpt.Flag.AcceptsArgument)
                     {
                         // skip next argument as it was parsed by this option
                         i++;
@@ -169,10 +196,15 @@ namespace Antmicro.OptionsParser
             return bldr.ToString();
         }
 
-        public IEnumerable<ICommandLineOption> Options { get { return options; } }
-        public IEnumerable<ICommandLineOption> ParsedOptions { get { return parsedOptions; } }
-        public IEnumerable<IArgument> UnexpectedArguments { get { return unexpectedArguments; } }
+        public IEnumerable<IFlag> Options { get { return options; } }
+        public IEnumerable<IParsedArgument> ParsedOptions { get { return parsedOptions; } }
+        public IEnumerable<IUnexpectedArgument> UnexpectedArguments { get { return unexpectedArguments; } }
         public IEnumerable<PositionalArgument> Values { get { return values; } }
+
+        private static List<T> CreateDynamicList<T>(T obj)
+        {
+            return new List<T>();
+        }
 
         private void InnerParse(string[] args)
         {
@@ -191,8 +223,7 @@ namespace Antmicro.OptionsParser
                     }
                     else
                     {
-                        var arg = new PositionalArgument(((PositionalArgumentToken)token).Value) { Descriptor = token.Descriptor };
-                        unexpectedArguments.Add(arg);
+                        unexpectedArguments.Add(new UnexpectedArgument(((PositionalArgumentToken)token).Value));
                     }
                 }
                 else if(token is LongNameToken)
@@ -200,10 +231,12 @@ namespace Antmicro.OptionsParser
                     var foundOption = options.SingleOrDefault(x => x.LongName == ((LongNameToken)token).Name);
                     if(foundOption != null)
                     {
+                        var parsedOption = new CommandLineOption(foundOption);
+
                         if(foundOption.AcceptsArgument)
                         {
                             tokenizer.MarkPosition();
-                            if(foundOption.ParseArgument(tokenizer.ReadUntilTheEndOfString()))
+                            if(parsedOption.ParseArgument(tokenizer.ReadUntilTheEndOfString()))
                             {
                                 tokenizer.MoveToTheNextString();
                             }
@@ -213,16 +246,16 @@ namespace Antmicro.OptionsParser
                             }
                         }
 
-                        foundOption.Descriptor = token.Descriptor.WithLengthChangedBy(2); // -- prefix
+                        parsedOption.Descriptor = token.Descriptor.WithLengthChangedBy(2); // -- prefix
                         if(foundOption.OptionType == typeof(bool))
                         {
-                            foundOption.Value = true;
+                            parsedOption.Value = true;
                         }
-                        parsedOptions.Add(foundOption);
+                        parsedOptions.Add(parsedOption);
                     }
                     else
                     {
-                        unexpectedArguments.Add(new CommandLineOption(Tokenizer.NullCharacter, ((LongNameToken)token).Name, typeof(void)));
+                        unexpectedArguments.Add(new UnexpectedArgument(((LongNameToken)token).Name));
                     }
                 }
                 else if(token is ShortNameToken)
@@ -230,6 +263,8 @@ namespace Antmicro.OptionsParser
                     var foundOption = options.SingleOrDefault(x => x.ShortName == ((ShortNameToken)token).Name);
                     if(foundOption != null)
                     {
+                        var parsedOption = new CommandLineOption(foundOption);
+
                         int additionalLength = 0;
                         if(foundOption.AcceptsArgument)
                         {
@@ -244,23 +279,23 @@ namespace Antmicro.OptionsParser
                             if(argumentString != null)
                             {
                                 additionalLength = argumentString.Length;
-                                if(!foundOption.ParseArgument(argumentString))
+                                if(!parsedOption.ParseArgument(argumentString))
                                 {
                                     tokenizer.ResetPosition();
                                 }
                             }
                         }
 
-                        foundOption.Descriptor = token.Descriptor.WithLengthChangedBy(additionalLength);
+                        parsedOption.Descriptor = token.Descriptor.WithLengthChangedBy(additionalLength);
                         if(foundOption.OptionType == typeof(bool))
                         {
-                            foundOption.Value = true;
+                            parsedOption.Value = true;
                         }
-                        parsedOptions.Add(foundOption);
+                        parsedOptions.Add(parsedOption);
                     }
                     else
                     {
-                        unexpectedArguments.Add(new CommandLineOption(((ShortNameToken)token).Name, null, typeof(void)));
+                        unexpectedArguments.Add(new UnexpectedArgument(((ShortNameToken)token).Name.ToString()));
                     }
                 }
             }
@@ -269,7 +304,7 @@ namespace Antmicro.OptionsParser
         private bool Validate()
         {
             var forceHelp = false;
-            var isHelpSelected = parsedOptions.Contains(helpProvider);
+            var isHelpSelected = parsedOptions.Any(x => x.Flag == helpProvider);
             try
             {
                 var missingValue = values.FirstOrDefault(x => x.IsRequired && !x.IsSet);
@@ -281,7 +316,7 @@ namespace Antmicro.OptionsParser
                 var requiredOptions = options.Where(x => x.IsRequired);
                 foreach(var requiredOption in requiredOptions)
                 {
-                    if(!parsedOptions.Contains(requiredOption))
+                    if(!parsedOptions.Any(x => x.Flag == requiredOption))
                     {
                         throw new ValidationException(string.Format("Required option '{0}' is missing.", requiredOption.LongName ?? requiredOption.ShortName.ToString()));
                     }
@@ -289,9 +324,17 @@ namespace Antmicro.OptionsParser
 
                 foreach(var parsed in parsedOptions)
                 {
-                    if(!parsed.HasArgument && parsed.AcceptsArgument)
+                    if(!parsed.HasArgument && parsed.Flag.AcceptsArgument)
                     {
-                        throw new ValidationException(string.Format("Option '{0}' requires parameter of type '{1}'", parsed.LongName ?? parsed.ShortName.ToString(), parsed.OptionType.Name));
+                        throw new ValidationException(string.Format("Option '{0}' requires parameter of type '{1}'", parsed.Flag.LongName ?? parsed.Flag.ShortName.ToString(), parsed.Flag.OptionType.Name));
+                    }
+                }
+
+                foreach(var parsed in parsedOptions.GroupBy(x => x.Flag))
+                {
+                    if(parsed.Count() > 1 && !parsed.Key.AllowMultipleOccurences)
+                    {
+                        throw new ValidationException(string.Format("Option '{0}' occures more than once", parsed.Key.LongName ?? parsed.Key.ShortName.ToString()));
                     }
                 }
 
@@ -336,11 +379,11 @@ namespace Antmicro.OptionsParser
         }
 
         private string[] parsedArgs;
+        private readonly List<IUnexpectedArgument> unexpectedArguments;
         private readonly ParserConfiguration configuration;
-        private readonly List<ICommandLineOption> parsedOptions;
-        private readonly List<IArgument> unexpectedArguments;
+        private readonly List<IParsedArgument> parsedOptions;
         private readonly List<PositionalArgument> values;
-        private readonly HashSet<ICommandLineOption> options;
+        private readonly HashSet<IFlag> options;
         private CustomValidationMethod customValidationMethod;
         private int currentValuesCount;
         private HelpOption helpProvider;

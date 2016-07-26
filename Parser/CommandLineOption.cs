@@ -4,62 +4,49 @@ namespace Antmicro.OptionsParser
 {
     public class CommandLineOption<T> : CommandLineOption
     {
-        public CommandLineOption(char shortName, string longName) : base(shortName, longName, typeof(T))
+        public CommandLineOption(CommandLineOptionDescriptor descriptor) : base(descriptor)
         {
         }
 
-        public CommandLineOption(string longName) : base(Tokenizer.NullCharacter, longName, typeof(T))
-        {
-        }
-
-        public CommandLineOption(char shortName) : base(shortName, null, typeof(T))
-        {
-        }
-        
         public override object Value 
         {
             get 
             {
-                return value;
+                return base.Value;
             }
             set 
             {
-                this.value = value;
+                base.Value = value;
+
                 var parsed = Parsed;
                 if(parsed != null)
                 {
-                    parsed(this, (T)this.value);
+                    parsed(this, (T)base.Value);
                 }
             }
         }
         
         public event Action<CommandLineOption<T>, T> Parsed;
-        
-        private object value;
     }
 
-    public class CommandLineOption : ICommandLineOption, IEquatable<CommandLineOption>
+    public class CommandLineOption : IParsedArgument
     {
-        public CommandLineOption(char shortName, string longName, Type type) : this()
+        public CommandLineOption(IFlag descriptor)
         {
-            ShortName = shortName;
-            LongName = longName;
-            OptionType = type;
-
-            AcceptsArgument = (OptionType != typeof(bool));
+            Flag = descriptor;
         }
 
-        public virtual bool ParseArgument(string arg)
+        public bool ParseArgument(string arg)
         {
             object parsedValue;
-            if(OptionType.IsArray)
+            if(Flag.OptionType.IsArray)
             {
-                var values = (MaxElements > 0) ? arg.Split(new[] { Delimiter }, MaxElements) : arg.Split(Delimiter); 
-                var array = Array.CreateInstance(OptionType.GetElementType(), values.Length);
+                var values = (Flag.MaxElements > 0) ? arg.Split(new[] { Flag.Delimiter }, Flag.MaxElements) : arg.Split(Flag.Delimiter); 
+                var array = Array.CreateInstance(Flag.OptionType.GetElementType(), values.Length);
                 
                 for(int i = 0; i < values.Length; i++)
                 {
-                    if(!ParseHelper.TryParse(values[i], OptionType.GetElementType(), out parsedValue))
+                    if(!ParseHelper.TryParse(values[i], Flag.OptionType.GetElementType(), out parsedValue))
                     {
                         return false;
                     }
@@ -69,7 +56,7 @@ namespace Antmicro.OptionsParser
             }
             else
             {
-                if(!ParseHelper.TryParse(arg, OptionType, out parsedValue))
+                if(!ParseHelper.TryParse(arg, Flag.OptionType, out parsedValue))
                 {
                     return false;
                 }
@@ -80,37 +67,13 @@ namespace Antmicro.OptionsParser
             return true;
         }
 
-        public bool Equals(CommandLineOption other)
-        {
-            return (ShortName == other.ShortName && LongName == other.LongName);
-        }
+        public IFlag Flag { get; private set; }
 
-        public Type OptionType { get; protected set; }
-
-        public char ShortName { get; protected set; }
-
-        public string LongName { get; protected set; }
-
-        public string Description { get; set; }
-
-        public virtual object Value { get; set; }
-
-        public virtual bool AcceptsArgument { get; protected set; }
-        
         public bool HasArgument { get; protected set; }
 
-        public bool IsRequired { get; protected set; }
-
         public ElementDescriptor Descriptor { get; set; }
-        
-        public char Delimiter { get; set; }
-        
-        public int MaxElements { get; set; }
 
-        protected CommandLineOption()
-        {
-            Delimiter = ';';
-        }
+        public virtual object Value { get; set; }
     }
 }
 

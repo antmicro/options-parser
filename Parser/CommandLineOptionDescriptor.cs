@@ -1,12 +1,30 @@
-﻿using System.Reflection;
+﻿using System;
 using System.Linq;
-using System;
+using System.Reflection;
 
 namespace Antmicro.OptionsParser
 {
-    public class AutomaticCommandLineOption : CommandLineOption
+    public class CommandLineOptionDescriptor : IFlag
     {
-        public AutomaticCommandLineOption(PropertyInfo pinfo)
+        public CommandLineOptionDescriptor(char shortName, Type type) : this(shortName, null, type)
+        {
+        }
+
+        public CommandLineOptionDescriptor(string longName, Type type) : this(Tokenizer.NullCharacter, longName, type)
+        {
+        }
+
+        public CommandLineOptionDescriptor(char shortName, string longName, Type type) : this()
+        {
+            ShortName = shortName;
+            LongName = longName;
+            OptionType = type;
+
+            AcceptsArgument = (OptionType != typeof(bool));
+            AllowMultipleOccurences = false;
+        }
+
+        public CommandLineOptionDescriptor(PropertyInfo pinfo) : this()
         {
             var nameAttribute = pinfo.GetCustomAttribute<NameAttribute>();
             if(nameAttribute != null)
@@ -26,6 +44,7 @@ namespace Antmicro.OptionsParser
 
             IsRequired = (pinfo.GetCustomAttribute<RequiredAttribute>() != null);
             AcceptsArgument = (pinfo.PropertyType != typeof(bool));
+            AllowMultipleOccurences = pinfo.PropertyType.IsArray;
 
             var defaultValueAttribute = pinfo.GetCustomAttribute<DefaultValueAttribute>();
             if(defaultValueAttribute != null)
@@ -34,8 +53,7 @@ namespace Antmicro.OptionsParser
                 {
                     throw new ArgumentException(string.Format("Default value for option '{0}' is of unexpected type.", LongName ?? ShortName.ToString()));
                 }
-                HasDefaultValue = true;
-                Value = defaultValueAttribute.DefaultValue;
+                DefaultValue = defaultValueAttribute.DefaultValue;
             }
 
             var descriptionAttribute = pinfo.GetCustomAttribute<DescriptionAttribute>();
@@ -43,7 +61,7 @@ namespace Antmicro.OptionsParser
             {
                 Description = descriptionAttribute.Value;
             }
-            
+
             if(OptionType.IsArray)
             {
                 var numberOfElementsAttribute = pinfo.GetCustomAttribute<NumberOfElementsAttribute>();
@@ -59,9 +77,32 @@ namespace Antmicro.OptionsParser
             }
         }
 
-        public bool HasDefaultValue { get; private set; }
+        public bool AcceptsArgument { get; private set; }
+
+        public object DefaultValue { get; private set; }
+
+        public char Delimiter { get; private set; }
+
+        public string Description { get; set; }
+
+        public int MaxElements { get; private set; }
+
+        public bool IsRequired { get; private set; }
+
+        public string LongName { get; private set; }
+
+        public Type OptionType { get; private set; }
+
+        public char ShortName { get; private set; }
 
         public PropertyInfo UnderlyingProperty { get; private set; }
+
+        public bool AllowMultipleOccurences { get; private set; }
+
+        private CommandLineOptionDescriptor()
+        {
+            Delimiter = ';';
+        }
     }
 }
 
