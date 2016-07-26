@@ -464,12 +464,25 @@ namespace Antmicro.OptionsParser.Tests
 
         [Test]
         [ExpectedException(typeof(ValidationException))]
-        public void ShouldThrowAnExceptionOnUnexpectedMultipleOccurenceOfArgument()
+        public void ShouldThrowAnExceptionOnUnexpectedMultipleOccurencesOfArgument()
         {
             var args = new[] { "--value", "5", "--value", "6" };
             var parser = new OptionsParser(new ParserConfiguration { ThrowValidationException = true });
             var options = new OptionsWithInt();
             parser.Parse(options, args);
+        }
+
+        [Test]
+        public void ShouldHandleMultipleOccurencesOfArgument()
+        {
+            var args = new[] { "-v", "5", "-v", "6" };
+            var parser = new OptionsParser();
+            var options = new OptionsWithMultipleValues();
+            parser.Parse(options, args);
+
+            Assert.AreEqual(2, options.Values.Length);
+            Assert.AreEqual(5, options.Values[0]);
+            Assert.AreEqual(6, options.Values[1]);
         }
 
         private class OptionsWithInt
