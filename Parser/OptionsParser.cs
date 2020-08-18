@@ -163,7 +163,12 @@ namespace Antmicro.OptionsParser
                 }
                 
                 var shift = 0;
-                var pOpts = ParsedOptions.Cast<IParsedArgument>().Union(Values).Where(x => x.Descriptor.Index == i).OrderBy(y => y.Descriptor.LocalPosition).ToList();
+                var pOpts = ParsedOptions
+                    .Cast<IParsedArgument>()
+                    .Union(Values.Where(y => y.IsSet))
+                    .Where(x => x.Descriptor.Index == i)
+                    .OrderBy(y => y.Descriptor.LocalPosition)
+                    .ToList();
                 foreach (var pOpt in pOpts)
                 {
                     arg = arg.Remove(pOpt.Descriptor.LocalPosition - shift, pOpt.Descriptor.Length);
