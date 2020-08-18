@@ -49,7 +49,9 @@ namespace Antmicro.OptionsParser
                 {
                     // we already peeked it, so just move to the next char
                     ReadChar();
-                    return new LongNameToken(ReadUntilChar(Tokenizer.EndOfString, AssignmentOperator), location);
+                    var name = ReadUntilChar(out var lastReadChar, Tokenizer.EndOfString, AssignmentOperator);
+                    var hasAssignment = lastReadChar == AssignmentOperator;
+                    return new LongNameToken(name, hasAssignment, location);
                 }
 
                 state = TokenizerState.ShortName;
@@ -137,7 +139,7 @@ namespace Antmicro.OptionsParser
             return input[position].ElementAt(stringPosition);
         }
 
-        private string ReadUntilChar(params char[] c)
+        private string ReadUntilChar(out char lastReadChar, params char[] c)
         {
             var builder = new StringBuilder();
             char current = Tokenizer.NullCharacter;
@@ -148,6 +150,7 @@ namespace Antmicro.OptionsParser
                     builder.Append(current);
                 }
                 current = ReadChar();
+                lastReadChar = current;
             }
             while(current != Tokenizer.NullCharacter && !c.Contains(current));
 

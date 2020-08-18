@@ -36,7 +36,7 @@ namespace Antmicro.OptionsParser
             Flag = descriptor;
         }
 
-        public bool ParseArgument(string arg)
+        public bool ParseArgument(string arg, bool isSeparated)
         {
             object parsedValue;
             if(Flag.OptionType.IsArray)
@@ -64,12 +64,15 @@ namespace Antmicro.OptionsParser
             }
             
             HasArgument = true;
+            IsSeparated = isSeparated;
             return true;
         }
 
         public IFlag Flag { get; private set; }
 
         public bool HasArgument { get; protected set; }
+
+        public bool IsSeparated { get; protected set; }
 
         public ElementDescriptor Descriptor { get; set; }
 

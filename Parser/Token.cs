@@ -12,12 +12,14 @@
 
     public class LongNameToken : Token
     {
-        public LongNameToken(string name, ElementDescriptor desc) : base(desc.WithLengthChangedBy(name.Length))
+        public LongNameToken(string name, bool hasAssignment, ElementDescriptor desc) : base(desc.WithLengthChangedBy(name.Length))
         {
             Name = name;
+            HasAssignment = hasAssignment;
         }
 
         public string Name { get; private set; }
+        public bool HasAssignment { get; private set; }
     }
 
     public class ShortNameToken : Token

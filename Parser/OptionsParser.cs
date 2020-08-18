@@ -169,7 +169,7 @@ namespace Antmicro.OptionsParser
                     arg = arg.Remove(pOpt.Descriptor.LocalPosition - shift, pOpt.Descriptor.Length);
                     shift += pOpt.Descriptor.Length;
                     
-                    if(pOpt.HasArgument && pOpt.Flag.AcceptsArgument)
+                    if(pOpt.IsSeparated)
                     {
                         // skip next argument as it was parsed by this option
                         i++;
@@ -233,10 +233,18 @@ namespace Antmicro.OptionsParser
                     {
                         var parsedOption = new CommandLineOption(foundOption);
 
+                        int additionalLength = 0;
+                        var isSeparated = true;
                         if(foundOption.AcceptsArgument)
                         {
                             tokenizer.MarkPosition();
-                            if(parsedOption.ParseArgument(tokenizer.ReadUntilTheEndOfString()))
+                            var argumentString = tokenizer.ReadUntilTheEndOfString();
+                            if(((LongNameToken)token).HasAssignment)
+                            {
+                                additionalLength = argumentString.Length + 1; // argument length + '='
+                                isSeparated = false;
+                            }
+                            if(parsedOption.ParseArgument(argumentString, isSeparated))
                             {
                                 tokenizer.MoveToTheNextString();
                             }
@@ -246,7 +254,7 @@ namespace Antmicro.OptionsParser
                             }
                         }
 
-                        parsedOption.Descriptor = token.Descriptor.WithLengthChangedBy(2); // -- prefix
+                        parsedOption.Descriptor = token.Descriptor.WithLengthChangedBy(2 + additionalLength); // -- prefix
                         if(foundOption.OptionType == typeof(bool))
                         {
                             parsedOption.Value = true;
@@ -266,6 +274,7 @@ namespace Antmicro.OptionsParser
                         var parsedOption = new CommandLineOption(foundOption);
 
                         int additionalLength = 0;
+                        var isSeparated = false;
                         if(foundOption.AcceptsArgument)
                         {
                             tokenizer.MarkPosition();
@@ -275,17 +284,17 @@ namespace Antmicro.OptionsParser
                                 // it means that the value is separated by a whitespace
                                 tokenizer.MoveToTheNextString();
                                 argumentString = tokenizer.ReadUntilTheEndOfString();
+                                isSeparated = true;
                             }
                             if(argumentString != null)
                             {
-                                additionalLength = argumentString.Length;
-                                if(!parsedOption.ParseArgument(argumentString))
+                                additionalLength = isSeparated ? 0 : argumentString.Length;
+                                if(!parsedOption.ParseArgument(argumentString, isSeparated))
                                 {
                                     tokenizer.ResetPosition();
                                 }
                             }
                         }
-
                         parsedOption.Descriptor = token.Descriptor.WithLengthChangedBy(additionalLength);
                         if(foundOption.OptionType == typeof(bool))
                         {

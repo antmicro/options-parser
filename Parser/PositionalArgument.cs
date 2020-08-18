@@ -71,6 +71,7 @@ namespace Antmicro.OptionsParser
         public IFlag Flag { get { return null; } }
         
         public bool HasArgument { get { return false; } }
+        public bool IsSeparated { get { return false; } }
         public bool AcceptsArgument { get { return false; } }
         
         public string Name { get; private set; }
