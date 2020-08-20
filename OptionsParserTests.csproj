@@ -32,8 +32,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="nunit.framework">
-        <HintPath>packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
-        <Package>nunit</Package>
+      <HintPath>..\resources\tools\nunit.framework.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
