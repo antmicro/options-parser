@@ -485,6 +485,283 @@ namespace Antmicro.OptionsParser.Tests
             Assert.AreEqual(6, options.Values[1]);
         }
 
+        [Test]
+        public void ShouldRecreateUnparsedArgument1()
+        {
+            var args = new[] { "positional argument", "--wrong-arg", "-p8888" };
+            var parser = new OptionsParser();
+            parser.WithOption<int>('p');
+            var options = new OptionsWithMultipleArguments();
+            parser.Parse(options, args);
+
+            Assert.AreEqual("positional argument", options.Value);
+            Assert.AreEqual(1, parser.ParsedOptions.Count());
+            Assert.AreEqual('p', parser.ParsedOptions.First().Flag.ShortName);
+            Assert.AreEqual(8888, parser.ParsedOptions.First().Value);
+
+            Assert.AreEqual(1, parser.UnexpectedArguments.Count());
+            Assert.AreEqual("wrong-arg", parser.UnexpectedArguments.ElementAt(0).Value);
+            Assert.AreEqual("--wrong-arg", parser.RecreateUnparsedArguments());
+        }
+
+        [Test]
+        public void ShouldRecreateUnparsedArgument2()
+        {
+            var args = new[] { "positional argument", "--wrong-arg", "-p", "8888" };
+            var parser = new OptionsParser();
+            parser.WithOption<int>('p');
+            var options = new OptionsWithMultipleArguments();
+            parser.Parse(options, args);
+
+            Assert.AreEqual("positional argument", options.Value);
+            Assert.AreEqual(1, parser.ParsedOptions.Count());
+            Assert.AreEqual('p', parser.ParsedOptions.First().Flag.ShortName);
+            Assert.AreEqual(8888, parser.ParsedOptions.First().Value);
+
+            Assert.AreEqual(1, parser.UnexpectedArguments.Count());
+            Assert.AreEqual("wrong-arg", parser.UnexpectedArguments.ElementAt(0).Value);
+            Assert.AreEqual("--wrong-arg", parser.RecreateUnparsedArguments());
+        }
+
+        [Test]
+        public void ShouldRecreateUnparsedArgument3()
+        {
+            var args = new[] { "positional argument", "-p8888", "--wrong-arg" };
+            var parser = new OptionsParser();
+            parser.WithOption<int>('p');
+            var options = new OptionsWithMultipleArguments();
+            parser.Parse(options, args);
+
+            Assert.AreEqual("positional argument", options.Value);
+            Assert.AreEqual(1, parser.ParsedOptions.Count());
+            Assert.AreEqual('p', parser.ParsedOptions.First().Flag.ShortName);
+            Assert.AreEqual(8888, parser.ParsedOptions.First().Value);
+
+            Assert.AreEqual(1, parser.UnexpectedArguments.Count());
+            Assert.AreEqual("wrong-arg", parser.UnexpectedArguments.ElementAt(0).Value);
+            Assert.AreEqual("--wrong-arg", parser.RecreateUnparsedArguments());
+        }
+
+        [Test]
+        public void ShouldRecreateUnparsedArgument4()
+        {
+            var args = new[] { "positional argument", "--wrong-arg", "--port", "8888" };
+            var parser = new OptionsParser();
+            parser.WithOption<int>("port");
+            var options = new OptionsWithMultipleArguments();
+            parser.Parse(options, args);
+
+            Assert.AreEqual("positional argument", options.Value);
+            Assert.AreEqual(1, parser.ParsedOptions.Count());
+            Assert.AreEqual("port", parser.ParsedOptions.ToArray()[0].Flag.LongName);
+            Assert.AreEqual(8888, parser.ParsedOptions.ToArray()[0].Value);
+
+            Assert.AreEqual(1, parser.UnexpectedArguments.Count());
+            Assert.AreEqual("wrong-arg", parser.UnexpectedArguments.ElementAt(0).Value);
+            Assert.AreEqual("--wrong-arg", parser.RecreateUnparsedArguments());
+        }
+
+        [Test]
+        public void ShouldRecreateUnparsedArgument5()
+        {
+            var args = new[] { "positional argument", "--wrong-arg", "--port=8888" };
+            var parser = new OptionsParser();
+            parser.WithOption<int>("port");
+            var options = new OptionsWithMultipleArguments();
+            parser.Parse(options, args);
+
+            Assert.AreEqual("positional argument", options.Value);
+            Assert.AreEqual(1, parser.ParsedOptions.Count());
+            Assert.AreEqual("port", parser.ParsedOptions.ToArray()[0].Flag.LongName);
+            Assert.AreEqual(8888, parser.ParsedOptions.ToArray()[0].Value);
+
+            Assert.AreEqual(1, parser.UnexpectedArguments.Count());
+            Assert.AreEqual("wrong-arg", parser.UnexpectedArguments.ElementAt(0).Value);
+            Assert.AreEqual("--wrong-arg", parser.RecreateUnparsedArguments());
+        }
+
+        [Test]
+        public void ShouldRecreateUnparsedArgument6()
+        {
+            var args = new[] { "positional argument", "--port", "8888", "--wrong-arg" };
+            var parser = new OptionsParser();
+            parser.WithOption<int>("port");
+            var options = new OptionsWithMultipleArguments();
+            parser.Parse(options, args);
+
+            Assert.AreEqual("positional argument", options.Value);
+            Assert.AreEqual(1, parser.ParsedOptions.Count());
+            Assert.AreEqual("port", parser.ParsedOptions.ToArray()[0].Flag.LongName);
+            Assert.AreEqual(8888, parser.ParsedOptions.ToArray()[0].Value);
+
+            Assert.AreEqual(1, parser.UnexpectedArguments.Count());
+            Assert.AreEqual("wrong-arg", parser.UnexpectedArguments.ElementAt(0).Value);
+            Assert.AreEqual("--wrong-arg", parser.RecreateUnparsedArguments());
+        }
+
+        [Test]
+        public void ShouldRecreateUnparsedArgument7()
+        {
+            var args = new[] { "positional argument", "--port=8888", "--wrong-arg" };
+            var parser = new OptionsParser();
+            parser.WithOption<int>("port");
+            var options = new OptionsWithMultipleArguments();
+            parser.Parse(options, args);
+
+            Assert.AreEqual("positional argument", options.Value);
+            Assert.AreEqual(1, parser.ParsedOptions.Count());
+            Assert.AreEqual("port", parser.ParsedOptions.ToArray()[0].Flag.LongName);
+            Assert.AreEqual(8888, parser.ParsedOptions.ToArray()[0].Value);
+
+            Assert.AreEqual(1, parser.UnexpectedArguments.Count());
+            Assert.AreEqual("wrong-arg", parser.UnexpectedArguments.ElementAt(0).Value);
+            Assert.AreEqual("--wrong-arg", parser.RecreateUnparsedArguments());
+        }
+
+        [Test]
+        public void ShouldRecreateUnparsedArgument8()
+        {
+            var args = new[] { "--wrong-arg", "-n123" };
+            var parser = new OptionsParser();
+            parser.WithOption<int>('n');
+
+            parser.Parse(args);
+
+            Assert.AreEqual(1, parser.ParsedOptions.Count());
+            Assert.AreEqual('n', parser.ParsedOptions.First().Flag.ShortName);
+            Assert.AreEqual(123, parser.ParsedOptions.First().Value);
+
+            Assert.AreEqual(1, parser.UnexpectedArguments.Count());
+            Assert.AreEqual("wrong-arg", parser.UnexpectedArguments.ElementAt(0).Value);
+            Assert.AreEqual("--wrong-arg", parser.RecreateUnparsedArguments());
+        }
+
+        [Test]
+        public void ShouldRecreateUnparsedArgument9()
+        {
+            var args = new[] { "--wrong-arg", "-n", "123" };
+            var parser = new OptionsParser();
+            parser.WithOption<int>('n');
+
+            parser.Parse(args);
+
+            Assert.AreEqual(1, parser.ParsedOptions.Count());
+            Assert.AreEqual('n', parser.ParsedOptions.First().Flag.ShortName);
+            Assert.AreEqual(123, parser.ParsedOptions.First().Value);
+
+            Assert.AreEqual(1, parser.UnexpectedArguments.Count());
+            Assert.AreEqual("wrong-arg", parser.UnexpectedArguments.ElementAt(0).Value);
+            Assert.AreEqual("--wrong-arg", parser.RecreateUnparsedArguments());
+        }
+
+        [Test]
+        public void ShouldRecreateUnparsedArgument10()
+        {
+            var args = new[] { "--no-xwt", "--port", "8888" };
+            var parser = new OptionsParser();
+            parser.WithOption<int>("port");
+
+            parser.Parse(args);
+
+            Assert.AreEqual(1, parser.ParsedOptions.Count());
+            Assert.AreEqual("port", parser.ParsedOptions.First().Flag.LongName);
+            Assert.AreEqual(8888, parser.ParsedOptions.First().Value);
+
+            Assert.AreEqual(1, parser.UnexpectedArguments.Count());
+            Assert.AreEqual("no-xwt", parser.UnexpectedArguments.ElementAt(0).Value);
+            Assert.AreEqual("--no-xwt", parser.RecreateUnparsedArguments());
+        }
+
+        [Test]
+        public void ShouldRecreateUnparsedArgument11()
+        {
+            var args = new[] { "--no-xwt", "--port=8888" };
+            var parser = new OptionsParser();
+            parser.WithOption<int>("port");
+
+            parser.Parse(args);
+
+            Assert.AreEqual(1, parser.ParsedOptions.Count());
+            Assert.AreEqual("port", parser.ParsedOptions.First().Flag.LongName);
+            Assert.AreEqual(8888, parser.ParsedOptions.First().Value);
+
+            Assert.AreEqual(1, parser.UnexpectedArguments.Count());
+            Assert.AreEqual("no-xwt", parser.UnexpectedArguments.ElementAt(0).Value);
+            Assert.AreEqual("--no-xwt", parser.RecreateUnparsedArguments());
+        }
+
+        [Test]
+        public void ShouldRecreateUnparsedArgument12()
+        {
+            var args = new[] { "-n123", "--wrong-arg" };
+            var parser = new OptionsParser();
+            parser.WithOption<int>('n');
+
+            parser.Parse(args);
+
+            Assert.AreEqual(1, parser.ParsedOptions.Count());
+            Assert.AreEqual('n', parser.ParsedOptions.First().Flag.ShortName);
+            Assert.AreEqual(123, parser.ParsedOptions.First().Value);
+
+            Assert.AreEqual(1, parser.UnexpectedArguments.Count());
+            Assert.AreEqual("wrong-arg", parser.UnexpectedArguments.ElementAt(0).Value);
+            Assert.AreEqual("--wrong-arg", parser.RecreateUnparsedArguments());
+        }
+
+        [Test]
+        public void ShouldRecreateUnparsedArgument13()
+        {
+            var args = new[] { "-n", "123", "--wrong-arg" };
+            var parser = new OptionsParser();
+            parser.WithOption<int>('n');
+
+            parser.Parse(args);
+
+            Assert.AreEqual(1, parser.ParsedOptions.Count());
+            Assert.AreEqual('n', parser.ParsedOptions.First().Flag.ShortName);
+            Assert.AreEqual(123, parser.ParsedOptions.First().Value);
+
+            Assert.AreEqual(1, parser.UnexpectedArguments.Count());
+            Assert.AreEqual("wrong-arg", parser.UnexpectedArguments.ElementAt(0).Value);
+            Assert.AreEqual("--wrong-arg", parser.RecreateUnparsedArguments());
+        }
+
+        [Test]
+        public void ShouldRecreateUnparsedArgument14()
+        {
+            var args = new[] { "--port", "8888", "--no-xwt" };
+            var parser = new OptionsParser();
+            parser.WithOption<int>("port");
+
+            parser.Parse(args);
+
+            Assert.AreEqual(1, parser.ParsedOptions.Count());
+            Assert.AreEqual("port", parser.ParsedOptions.First().Flag.LongName);
+            Assert.AreEqual(8888, parser.ParsedOptions.First().Value);
+
+            Assert.AreEqual(1, parser.UnexpectedArguments.Count());
+            Assert.AreEqual("no-xwt", parser.UnexpectedArguments.ElementAt(0).Value);
+            Assert.AreEqual("--no-xwt", parser.RecreateUnparsedArguments());
+        }
+
+        [Test]
+        public void ShouldRecreateUnparsedArgument15()
+        {
+            var args = new[] { "--port=8888", "--no-xwt" };
+            var parser = new OptionsParser();
+            parser.WithOption<int>("port");
+
+            parser.Parse(args);
+
+            Assert.AreEqual(1, parser.ParsedOptions.Count());
+            Assert.AreEqual("port", parser.ParsedOptions.First().Flag.LongName);
+            Assert.AreEqual(8888, parser.ParsedOptions.First().Value);
+
+            Assert.AreEqual(1, parser.UnexpectedArguments.Count());
+            Assert.AreEqual("no-xwt", parser.UnexpectedArguments.ElementAt(0).Value);
+            Assert.AreEqual("--no-xwt", parser.RecreateUnparsedArguments());
+        }
+
         private class OptionsWithInt
         {
             [DefaultValue(-1)]
@@ -537,6 +814,21 @@ namespace Antmicro.OptionsParser.Tests
         {
             [Required, PositionalArgument(0), Name("value")]
             public string Value { get; set; }
+        }
+
+        private class OptionsWithMultipleArguments
+        {
+            [PositionalArgument(0), Name("value")]
+            public string Value { get; set; }
+
+            [PositionalArgument(1)]
+            public string Arg2 { get; set; }
+
+            [PositionalArgument(2)]
+            public string Arg3 { get; set; }
+
+            [PositionalArgument(3)]
+            public string Arg4 { get; set; }
         }
     }
 }
