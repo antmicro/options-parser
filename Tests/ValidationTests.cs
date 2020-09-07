@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using NUnit.Framework;
 
@@ -76,6 +77,14 @@ namespace Antmicro.OptionsParser.Tests
             {
                 Assert.IsTrue(e.Message.Contains("is of unexpected type"));
             }
+        }
+
+        [TestFixtureSetUp]
+        public void ConfigureOutput()
+        {
+            var sw = new StringWriter();
+            System.Console.SetOut(sw);
+            System.Console.SetError(sw);
         }
 
         private class OptionsWithCustomValidator : IValidatedOptions

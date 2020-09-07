@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using NUnit.Framework;
 
@@ -759,6 +760,14 @@ namespace Antmicro.OptionsParser.Tests
             Assert.AreEqual(1, parser.UnexpectedArguments.Count());
             Assert.AreEqual("no-xwt", parser.UnexpectedArguments.ElementAt(0).Value);
             Assert.AreEqual("--no-xwt", parser.RecreateUnparsedArguments());
+        }
+
+        [TestFixtureSetUp]
+        public void ConfigureOutput()
+        {
+            var sw = new StringWriter();
+            System.Console.SetOut(sw);
+            System.Console.SetError(sw);
         }
 
         private class OptionsWithInt
