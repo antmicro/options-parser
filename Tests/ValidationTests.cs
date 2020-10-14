@@ -79,7 +79,7 @@ namespace Antmicro.OptionsParser.Tests
             }
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void ConfigureOutput()
         {
             var sw = new StringWriter();

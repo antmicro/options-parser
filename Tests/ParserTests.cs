@@ -463,13 +463,14 @@ namespace Antmicro.OptionsParser.Tests
         }
 
         [Test]
-        [ExpectedException(typeof(ValidationException))]
         public void ShouldThrowAnExceptionOnUnexpectedMultipleOccurencesOfArgument()
         {
             var args = new[] { "--value", "5", "--value", "6" };
             var parser = new OptionsParser(new ParserConfiguration { ThrowValidationException = true });
             var options = new OptionsWithInt();
-            parser.Parse(options, args);
+            
+            Assert.Throws<ValidationException>(() =>
+                parser.Parse(options, args));
         }
 
         [Test]
@@ -762,7 +763,7 @@ namespace Antmicro.OptionsParser.Tests
             Assert.AreEqual("--no-xwt", parser.RecreateUnparsedArguments());
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void ConfigureOutput()
         {
             var sw = new StringWriter();
