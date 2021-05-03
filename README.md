@@ -1,8 +1,12 @@
-# OptionsParser 0.1
+# OptionsParser
 
-This is the *OptionsParser* project by [Antmicro](http://antmicro.com), a simple to use library for parsing unix-style command line options, written in C\#.
+Copyright (c) 2015-2021 [Antmicro](https://www.antmicro.com)
+
+OptionsParser is an easy to use library for parsing UNIX-style command line options, written in C\#.
+
+It is developed as part of the [Renode Framework](https://www.renode.io).
 
 ## Licence
 
-*OptionsParser* is released on an MIT licence, which can be found in the LICENCE file in this directory.
+OptionsParser is released on an MIT licence, which can be found in the LICENCE file in this directory.
 
