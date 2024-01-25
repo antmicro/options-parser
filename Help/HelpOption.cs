@@ -11,7 +11,7 @@ namespace Antmicro.OptionsParser
         {
             return new HelpOption(new ApplicationInfo());
         }
-        
+
         public static HelpOption CreateInstance<T>()
         {
             var appInfo = new ApplicationInfo();
@@ -45,26 +45,26 @@ namespace Antmicro.OptionsParser
                     valuesBuilder.AppendFormat(" [{0}]", value.Name);
                 }
             }
-            
+
             var usageLine = string.Format(UsageLineFormat, appInfo.ApplicationBinaryName, valuesBuilder);
             Console.WriteLine(CustomUsageLineGenerator != null
                 ? CustomUsageLineGenerator(usageLine)
                 : usageLine);
 
             Console.WriteLine();
-             
+
             var interestingPositionalArguments = parser.Values.Where(x => !string.IsNullOrEmpty(x.Description) || x.ParameterType.IsEnum).ToList();
             if(interestingPositionalArguments.Count > 0)
             {
                 Console.WriteLine("Arguments:");
                 Console.WriteLine();
-                
+
                 foreach(var value in interestingPositionalArguments)
                 {
                     Console.WriteLine(GeneratePositionalArgumentHelpEntry(value));
                 }
             }
-            
+
             Console.WriteLine("Options:");
             Console.WriteLine();
 
@@ -79,7 +79,7 @@ namespace Antmicro.OptionsParser
                 Console.WriteLine(CustomFooterGenerator());
             }
         }
-        
+
         public Func<IFlag, string> CustomOptionEntryHelpGenerator { get; set; }
 
         public Func<string, string> CustomUsageLineGenerator { get; set; }
@@ -92,7 +92,7 @@ namespace Antmicro.OptionsParser
         {
             var optionBuilder = new StringBuilder();
             optionBuilder.AppendFormat(" '{0}' has possible values:\n\n", argument.Name);
-            
+
             if(argument.ParameterType.IsEnum)
             {
                 foreach(var e in GetEnumNames(argument.ParameterType))
@@ -102,11 +102,11 @@ namespace Antmicro.OptionsParser
                     {
                         optionBuilder.Append(e.Item2);
                     }
-                        
+
                     optionBuilder.Append("\n\n");
                 }
             }
-            
+
             return optionBuilder.ToString();
         }
 
@@ -159,11 +159,11 @@ namespace Antmicro.OptionsParser
 
             return optionBuilder.ToString();
         }
-        
+
         private static Tuple<string, string>[] GetEnumNames(Type enumType)
         {
             DescriptionAttribute attr;
-            
+
             return Enum.GetValues(enumType)
                 .Cast<Enum>()
                 .Select(x => Enum.GetName(enumType, x))
