@@ -233,7 +233,8 @@ namespace Antmicro.OptionsParser
                 }
                 else if(token is LongNameToken)
                 {
-                    var foundOption = options.SingleOrDefault(x => x.LongName == ((LongNameToken)token).Name);
+                    var name = ((LongNameToken)token).Name;
+                    var foundOption = options.SingleOrDefault(x => x.LongName == name || x.Aliases.Contains(name));
                     if(foundOption != null)
                     {
                         var parsedOption = new CommandLineOption(foundOption);
