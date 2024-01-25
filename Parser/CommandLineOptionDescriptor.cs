@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace Antmicro.OptionsParser
@@ -75,6 +76,9 @@ namespace Antmicro.OptionsParser
                     Delimiter = delimiterAttribute.Delimiter;
                 }
             }
+
+            var aliases = pinfo.GetCustomAttributes(typeof(AliasAttribute), false).Cast<AliasAttribute>();
+            Aliases = aliases.Select(x => x.LongName);
         }
 
         public bool AcceptsArgument { get; private set; }
@@ -95,6 +99,8 @@ namespace Antmicro.OptionsParser
 
         public char ShortName { get; private set; }
 
+        public IEnumerable<string> Aliases { get; private set; }
+
         public PropertyInfo UnderlyingProperty { get; private set; }
 
         public bool AllowMultipleOccurences { get; private set; }
@@ -102,6 +108,7 @@ namespace Antmicro.OptionsParser
         private CommandLineOptionDescriptor()
         {
             Delimiter = ';';
+            Aliases = Enumerable.Empty<string>();
         }
     }
 }

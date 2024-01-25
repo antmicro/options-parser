@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace Antmicro.OptionsParser
@@ -9,6 +10,7 @@ namespace Antmicro.OptionsParser
         bool AllowMultipleOccurences { get; }
         char ShortName { get; }
         string LongName { get; }
+        IEnumerable<string> Aliases { get; }
         string Description { get; }
         bool IsRequired { get; }
         char Delimiter { get; }
