@@ -113,6 +113,30 @@ namespace Antmicro.OptionsParser
         private static string GenerateOptionHelpEntry(IFlag option)
         {
             var optionBuilder = new StringBuilder("  ");
+
+            AppendSwitchName(optionBuilder, option);
+            optionBuilder.Append(' ', Math.Max(0, 30 - optionBuilder.Length));
+            AppendTypeInformation(optionBuilder, option);
+
+            if(option.IsRequired)
+            {
+                optionBuilder.Append(" (required)");
+            }
+
+            if(!string.IsNullOrWhiteSpace(option.Description))
+            {
+                optionBuilder.AppendLine();
+
+                optionBuilder.Append(' ', 30);
+                optionBuilder.Append(option.Description);
+            }
+
+
+            return optionBuilder.ToString();
+        }
+
+        private static void AppendSwitchName(StringBuilder optionBuilder, IFlag option)
+        {
             if(option.ShortName != Tokenizer.NullCharacter)
             {
                 optionBuilder.AppendFormat("-{0}", option.ShortName);
@@ -126,7 +150,10 @@ namespace Antmicro.OptionsParser
 
                 optionBuilder.AppendFormat("--{0}", option.LongName);
             }
-            optionBuilder.Append(' ', Math.Max(0, 30 - optionBuilder.Length));
+        }
+
+        private static void AppendTypeInformation(StringBuilder optionBuilder, IFlag option)
+        {
             if(option.OptionType.IsArray)
             {
                 optionBuilder.AppendFormat("{0}s separated by '{1}'", option.OptionType.GetElementType().Name.ToUpper(), option.Delimiter);
@@ -143,21 +170,6 @@ namespace Antmicro.OptionsParser
             {
                 optionBuilder.Append(option.OptionType.Name.ToUpper());
             }
-            
-            if(option.IsRequired)
-            {
-                optionBuilder.Append(" (required)");
-            }
-
-            if(!string.IsNullOrWhiteSpace(option.Description))
-            {
-                optionBuilder.AppendLine();
-            
-                optionBuilder.Append(' ', 30);
-                optionBuilder.Append(option.Description);
-            }
-
-            return optionBuilder.ToString();
         }
 
         private static Tuple<string, string>[] GetEnumNames(Type enumType)
