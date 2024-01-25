@@ -131,6 +131,19 @@ namespace Antmicro.OptionsParser
                 optionBuilder.Append(option.Description);
             }
 
+            foreach(var alias in option.Aliases)
+            {
+                optionBuilder.AppendLine().AppendLine();
+                optionBuilder.AppendFormat("  --{0}", alias);
+                optionBuilder.Append(' ', Math.Max(0, 26 - alias.Length));
+                AppendTypeInformation(optionBuilder, option);
+                optionBuilder.AppendLine();
+
+                optionBuilder.Append(' ', 30);
+                optionBuilder.Append("Alias to ");
+                AppendSwitchName(optionBuilder, option);
+                optionBuilder.Append(".");
+            }
 
             return optionBuilder.ToString();
         }
