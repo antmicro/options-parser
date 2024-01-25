@@ -43,6 +43,7 @@
     <Compile Include="Parser\ParseHelper.cs" />
     <Compile Include="Validation\RequiredAttribute.cs" />
     <Compile Include="Description\NameAttribute.cs" />
+    <Compile Include="Description\AliasAttribute.cs" />
     <Compile Include="Description\DescriptionAttribute.cs" />
     <Compile Include="Validation\DefaultValueAttribute.cs" />
     <Compile Include="Validation\ValidationException.cs" />
