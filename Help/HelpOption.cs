@@ -115,7 +115,7 @@ namespace Antmicro.OptionsParser
             var optionBuilder = new StringBuilder("  ");
 
             AppendSwitchName(optionBuilder, option);
-            optionBuilder.Append(' ', Math.Max(0, 30 - optionBuilder.Length));
+            optionBuilder.Append(' ', Math.Max(0, DefaultIndent - optionBuilder.Length));
             AppendTypeInformation(optionBuilder, option);
 
             if(option.IsRequired)
@@ -127,7 +127,7 @@ namespace Antmicro.OptionsParser
             {
                 optionBuilder.AppendLine();
 
-                optionBuilder.Append(' ', 30);
+                optionBuilder.Append(' ', DefaultIndent);
                 optionBuilder.Append(option.Description);
             }
 
@@ -135,11 +135,11 @@ namespace Antmicro.OptionsParser
             {
                 optionBuilder.AppendLine().AppendLine();
                 optionBuilder.AppendFormat("  --{0}", alias);
-                optionBuilder.Append(' ', Math.Max(0, 26 - alias.Length));
+                optionBuilder.Append(' ', Math.Max(0, DefaultIndent - 4 - alias.Length)); // -4 to account for dashes and spaces
                 AppendTypeInformation(optionBuilder, option);
                 optionBuilder.AppendLine();
 
-                optionBuilder.Append(' ', 30);
+                optionBuilder.Append(' ', DefaultIndent);
                 optionBuilder.Append("Alias to ");
                 AppendSwitchName(optionBuilder, option);
                 optionBuilder.Append(".");
@@ -204,6 +204,7 @@ namespace Antmicro.OptionsParser
         }
 
         private readonly ApplicationInfo appInfo;
+        private const int DefaultIndent = 30;
     }
 }
 
