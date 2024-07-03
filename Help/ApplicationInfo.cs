@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Reflection;
 
 namespace Antmicro.OptionsParser
@@ -23,6 +24,17 @@ namespace Antmicro.OptionsParser
             }
 
             ApplicationBinaryName = AppDomain.CurrentDomain.FriendlyName;
+
+            var metadataAttributes = Assembly.GetEntryAssembly().GetCustomAttributes<AssemblyMetadataAttribute>();
+            foreach(var attribute in metadataAttributes)
+            {
+                switch(attribute.Key)
+                {
+                    case "BinaryName":
+                        ApplicationBinaryName = attribute.Value;
+                        break;
+                }
+            }
         }
 
         public string ApplicationName { get; private set; }
