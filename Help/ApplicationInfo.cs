@@ -6,18 +6,20 @@ namespace Antmicro.OptionsParser
 {
     public class ApplicationInfo
     {
-        public void GetInfo(Type t)
+        public ApplicationInfo()
         {
-            var applicationNameAttribute = t.Assembly.GetCustomAttribute<AssemblyTitleAttribute>();
+            var entryAssembly = Assembly.GetEntryAssembly();
+
+            var applicationNameAttribute = entryAssembly?.GetCustomAttribute<AssemblyTitleAttribute>();
             if(applicationNameAttribute != null)
             {
                 ApplicationName = applicationNameAttribute.Title;
             }
 
             // assembly version is not available through custom attribute...
-            ApplicationVersion = t.Assembly.GetName().Version.ToString();
+            ApplicationVersion = entryAssembly?.GetName().Version.ToString();
 
-            var applicationCopyrightAttribute = t.Assembly.GetCustomAttribute<AssemblyCopyrightAttribute>();
+            var applicationCopyrightAttribute = entryAssembly?.GetCustomAttribute<AssemblyCopyrightAttribute>();
             if(applicationCopyrightAttribute != null)
             {
                 ApplicationCopyrights = applicationCopyrightAttribute.Copyright;
@@ -25,7 +27,7 @@ namespace Antmicro.OptionsParser
 
             ApplicationBinaryName = AppDomain.CurrentDomain.FriendlyName;
 
-            var metadataAttributes = Assembly.GetEntryAssembly().GetCustomAttributes<AssemblyMetadataAttribute>();
+            var metadataAttributes = entryAssembly?.GetCustomAttributes<AssemblyMetadataAttribute>();
             foreach(var attribute in metadataAttributes)
             {
                 switch(attribute.Key)

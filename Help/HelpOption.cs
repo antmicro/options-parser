@@ -12,13 +12,6 @@ namespace Antmicro.OptionsParser
             return new HelpOption(new ApplicationInfo());
         }
 
-        public static HelpOption CreateInstance<T>()
-        {
-            var appInfo = new ApplicationInfo();
-            appInfo.GetInfo(typeof(T));
-            return new HelpOption(appInfo);
-        }
-
         public void PrintHelp(OptionsParser parser)
         {
             if(!string.IsNullOrWhiteSpace(appInfo.ApplicationName))

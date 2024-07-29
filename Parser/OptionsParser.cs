@@ -55,7 +55,7 @@ namespace Antmicro.OptionsParser
         /// <returns>True if parsing was sucessful and 'help' option was not detected. False when 'help' was encountered.</returns>
         public bool Parse<T>(T option, string[] args)
         {
-            helpProvider = HelpOption.CreateInstance<T>();
+            helpProvider = HelpOption.CreateInstance();
             helpProvider.CustomFooterGenerator = configuration.CustomFooterGenerator;
             helpProvider.CustomOptionEntryHelpGenerator = configuration.CustomOptionEntryHelpGenerator;
             helpProvider.CustomUsageLineGenerator = configuration.CustomUsageLineGenerator;
