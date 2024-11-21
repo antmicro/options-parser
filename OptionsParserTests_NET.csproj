@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net6.0</TargetFrameworks>
+    <RollForward>Major</RollForward>
     <RuntimeIdentifier Condition="$(PORTABLE) == 'true'">linux-x64</RuntimeIdentifier>
     <RootNamespace>Antmicro.OptionsParser.Tests</RootNamespace>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
