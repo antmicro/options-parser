@@ -6,9 +6,6 @@
     <AssemblyName>OptionsParser</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Remove="Tests\ParserTests.cs" />
     <Compile Remove="Tests\ValidationTests.cs" />
   </ItemGroup>
